@@ -399,7 +399,7 @@ GNFONT *load_font(char *file) {
 	return ft;
 }
 
-static Uint32 string_len(GNFONT *f, char *str) {
+static Uint32 string_len(GNFONT *f, const char *str) {
 	int i;
 	int size = 0;
 	if (str) {
@@ -421,7 +421,7 @@ static Uint32 string_len(GNFONT *f, char *str) {
 		return 0;
 }
 
-void draw_string(SDL_Surface *dst, GNFONT *f, int x, int y, char *str) {
+void draw_string(SDL_Surface *dst, GNFONT *f, int x, int y, const char *str) {
 	SDL_Rect srect, drect;
 	int i;
 
@@ -527,6 +527,7 @@ int gn_init_skin(void) {
 	gngeo_logo = res_load_stbi("skin/gngeo.tga");
 	gngeo_mask = res_load_stbi("skin/gngeo_mask.tga");
 
+	printf("gngeo_logo: %d\n",gngeo_logo);
 	pbar_logo = SDL_CreateRGBSurface(SDL_SWSURFACE, gngeo_logo->w, gngeo_logo->h, 32, 0xFF, 0xFF00, 0xFF0000, 0xFF000000);
 	SDL_SetAlpha(gngeo_logo, 0, 0);
 	//SDL_SetAlpha(gngeo_mask,0,0);
@@ -546,7 +547,7 @@ void gn_reset_pbar(void) {
 static SDL_Thread *pbar_th;
 
 typedef struct pbar_data {
-	char *name;
+	const char *name;
 	int pos;
 	int size;
 	int running;
@@ -598,7 +599,7 @@ int pbar_anim_thread(void *data) {
 	return 0;
 }
 
-void gn_init_pbar(char *name, int size) {
+void gn_init_pbar(const char *name, int size) {
 	pbar.name = name;
 	pbar.pos = 0;
 	pbar.size = size;
@@ -615,7 +616,7 @@ void gn_terminate_pbar(void) {
 	SDL_WaitThread(pbar_th, NULL);
 }
 
-void gn_popup_error(char *name, char *fmt, ...) {
+void gn_popup_error(const char *name, const char *fmt, ...) {
 	char buf[512];
 	va_list pvar;
 	va_start(pvar, fmt);
@@ -645,7 +646,7 @@ static int no_action(GN_MENU_ITEM *self, void *param) {
 }
 
 /* TODO: use a mini yes/no menu instead of B/X */
-int gn_popup_question(char *name, char *fmt, ...) {
+int gn_popup_question(const char *name, const char *fmt, ...) {
 	char buf[512];
 	va_list pvar;
 	va_start(pvar, fmt);
@@ -774,7 +775,7 @@ static void draw_menu(GN_MENU *m) {
 
 //#undef NB_ITEM_2
 
-GN_MENU_ITEM *gn_menu_create_item(char *name, Uint32 type,
+GN_MENU_ITEM *gn_menu_create_item(const char *name, Uint32 type,
 		int (*action)(GN_MENU_ITEM *self, void *param), void *param) {
 	GN_MENU_ITEM *t = malloc(sizeof (GN_MENU_ITEM));
 	t->name = strdup(name);
@@ -1022,7 +1023,7 @@ GN_MENU *create_menu(char *name, int type,
 	return gmenu;
 }
 
-GN_MENU_ITEM *gn_menu_add_item(GN_MENU *gmenu, char *name, int type,
+GN_MENU_ITEM *gn_menu_add_item(GN_MENU *gmenu, const char *name, int type,
 		int (*action)(struct GN_MENU_ITEM *self, void *param), void *param) {
 	GN_MENU_ITEM *gitem;
 	gitem = gn_menu_create_item(name, type, action, param);

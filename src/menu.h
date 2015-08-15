@@ -60,7 +60,7 @@ typedef struct GN_MENU {
 #define MENU_TXT_Y 62
 
 
-GN_MENU_ITEM* gn_menu_create_item(char *name,Uint32 type,
+GN_MENU_ITEM* gn_menu_create_item(const char *name,Uint32 type,
 				  int (*action)(GN_MENU_ITEM *self,void *param),void *param);
 int gn_menu_delete_item(GN_MENU_ITEM *menu);
 
@@ -68,12 +68,12 @@ int gn_init_skin(void);
 int gn_loop_menu(GN_MENU *m);
 Uint32 run_menu(void);
 void gn_reset_pbar(void);
-void gn_init_pbar(char *name,int size);
+void gn_init_pbar(const char *name,int size);
 void gn_update_pbar(int pos);
 void gn_terminate_pbar(void);
 
-void gn_popup_error(char *name,char *fmt,...);
-int gn_popup_question(char *name,char *fmt,...);
+void gn_popup_error(const char *name,const char *fmt,...);
+int gn_popup_question(const char *name, const char *fmt,...);
 
 #define gn_popup_info gn_popup_error
 
