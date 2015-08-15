@@ -2835,6 +2835,7 @@ void YM2610Init(int clock, int rate,
 
 void YM2610ChangeSamplerate(int rate) {
 	int i;
+
 	YM2610.OPN.ST.rate = rate;
 	SSG.step = ((double)SSG_STEP * rate * 8) / YM2610.OPN.ST.clock;
 	OPNSetPres(&YM2610.OPN, 6*24, 6*24, 4*2); /* OPN 1/6, SSG 1/4 */

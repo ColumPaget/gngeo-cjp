@@ -178,16 +178,13 @@ static char **read_str_array(char *val, int *size) {
 		if (val[i] == ',') nb_elem++;
 		i++;
 	}
-	printf("%s :NB elem %d\n", val, nb_elem);
 	tab = malloc(nb_elem * sizeof (char*));
 	if (!tab) return NULL;
 
 	v = strtok(val, ",");
-	printf("V1=%s\n", v);
 	for (i = 0; i < nb_elem; i++) {
 		tab[i] = rstrcpy(tab[i], v, 256);
 		v = strtok(NULL, ",");
-		printf("V%d=%s\n", i, v);
 	}
 	*size = nb_elem;
 	return tab;

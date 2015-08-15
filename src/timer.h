@@ -38,7 +38,7 @@ extern double timer_count;
 timer_struct *insert_timer(double duration, int param, void (*func) (int));
 //timer_struct *insert_timer(Uint32 duration, int param, void (*func) (int));
 void del_timer(timer_struct * ts);
-void my_timer(void);
+void my_timer();
 double timer_get_time(void);
 //Uint32 timer_get_time(void);
 void free_all_timer(void);

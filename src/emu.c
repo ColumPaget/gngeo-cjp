@@ -466,184 +466,10 @@ void main_loop(void) {
 			interpolation = interp;
 			reset_frame_skip();
 			reset_event();
+
 		}
 
-#if 0
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
-				case SDL_JOYAXISMOTION:
-				if (event.jaxis.value >5000 || event.jaxis.value<-5000)
-				printf("AXE %d %d dir %d\n",event.jaxis.which,event.jaxis.axis,event.jaxis.value);
-				joy_axe[event.jaxis.which][event.jaxis.axis] = event.jaxis.value;
-				if (show_keysym) {
-					sprintf(ksym_code, "%d", event.jaxis.axis);
-					draw_message(ksym_code);
-				}
-				break;
-
-				case SDL_JOYHATMOTION:
-				printf("HAT %d dir %d\n",event.jhat.which,event.jhat.value);
-				switch (event.jhat.value) {
-					case SDL_HAT_CENTERED:
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which]] = 0;
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which] + 1] = 0;
-					break;
-
-					case SDL_HAT_UP:
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which] + 1] = -32767;
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which]] = 0;
-					break;
-
-					case SDL_HAT_DOWN:
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which] + 1] = 32767;
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which]] = 0;
-					break;
-
-					case SDL_HAT_LEFT:
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which]] = -32767;
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which] + 1] = 0;
-					break;
-
-					case SDL_HAT_RIGHT:
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which]] = 32767;
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which] + 1] = 0;
-					break;
-
-					case SDL_HAT_RIGHTUP:
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which]] = 32767;
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which] + 1] = -32767;
-					break;
-
-					case SDL_HAT_RIGHTDOWN:
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which]] = 32767;
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which] + 1] = 32767;
-					break;
-
-					case SDL_HAT_LEFTUP:
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which]] = -32767;
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which] + 1] = -32767;
-					break;
-
-					case SDL_HAT_LEFTDOWN:
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which]] = -32767;
-					joy_axe[event.jhat.which][(event.jhat.hat * 2) + joy_numaxes[event.jhat.which] + 1] = 32767;
-					break;
-
-				}
-
-				if (show_keysym) {
-					sprintf(ksym_code, "%d", event.jhat.hat);
-					draw_message(ksym_code);
-				}
-				break;
-
-				case SDL_JOYBUTTONDOWN:
-				joy_button[event.jbutton.which][event.jbutton.button] = 1;
-				//printf("Joy event %d %d\n",event.jbutton.which,event.jbutton.button);
-
-				if (show_keysym) {
-					sprintf(ksym_code, "%d", event.jbutton.button);
-					draw_message(ksym_code);
-				}
-#ifdef GP2X
-				if ((joy_button[0][GP2X_VOL_UP]) && conf.sound) {
-					if (snd_volume<100) snd_volume+=5; else snd_volume=100;
-					gp2x_sound_volume_set(snd_volume,snd_volume);
-					for (i=0;i<snd_volume/5;i++) volbuf[i]='|';
-					for (i=snd_volume/5;i<20;i++) volbuf[i]='-';
-					volbuf[20]=0;
-					draw_message(volbuf);
-				}
-				if ((joy_button[0][GP2X_VOL_DOWN] && conf.sound)) {
-					if (snd_volume>0) snd_volume-=5; else snd_volume=0;
-					gp2x_sound_volume_set(snd_volume,snd_volume);
-					for (i=0;i<snd_volume/5;i++) volbuf[i]='|';
-					for (i=snd_volume/5;i<20;i++) volbuf[i]='-';
-					volbuf[20]=0;
-					draw_message(volbuf);
-				}
-				if ((joy_button[0][GP2X_PUSH]) &&
-						(joy_button[0][GP2X_VOL_DOWN]) &&
-						(joy_button[0][GP2X_VOL_UP]) ) {
-					//if ((joy_button[0][GP2X_L])) {
-					draw_message("Test Switch ON");
-					conf.test_switch = 1;
-					break;
-				}
-				//if ((joy_button[0][GP2X_PUSH]) && (joy_button[0][GP2X_R])) {
-				if (joy_button[0][GP2X_R] && joy_button[0][GP2X_L] &&
-						(joy_button[0][GP2X_START] || joy_button[0][GP2X_SELECT])) {
-					joy_button[0][GP2X_R] = joy_button[0][GP2X_L] = 0;
-					joy_button[0][GP2X_START] = joy_button[0][GP2X_SELECT] = 0;
-
-					SDL_BlitSurface(buffer, &buf_rect, state_img, &screen_rect);
-					if (conf.sound) {pause_audio(1); SDL_LockAudio();}
-					if (run_menu()==2) {neo_emu_done = 1;SDL_UnlockAudio();} // A bit ugly...
-					if (conf.sound) {pause_audio(0); SDL_UnlockAudio();}
-					//neo_emu_done = 1;
-					reset_frame_skip();
-					break;
-				}
-				/*
-				 switch (event.jbutton.button) {
-				 case GP2X_R:
-				 if (joy_button[0][GP2X_PUSH]) neo_emu_done = 1;
-				 break;	// ESC
-				 default:
-				 break;
-				 }*/
-#endif
-				break;
-				case SDL_JOYBUTTONUP:
-				joy_button[event.jbutton.which][event.jbutton.button] = 0;
-				break;
-#ifndef GP2X
-				case SDL_KEYUP:
-				key[event.key.keysym.sym] = 0;
-				break;
-				case SDL_KEYDOWN:
-				scancode = event.key.keysym.sym;
-				if (show_keysym) {
-					sprintf(ksym_code, "%d", scancode);
-					draw_message(ksym_code);
-				}
-				key[scancode] = 1;
-
-				switch (scancode) {
-					case SDLK_ESCAPE:
-					neo_emu_done = 1;
-					break; // ESC
-					/*
-					 case SDLK_TAB:
-					 main_gngeo_gui();
-					 break;
-					 */
-			}
-				break;
-#endif
-				case SDL_VIDEORESIZE:
-				conf.res_x=event.resize.w;
-				conf.res_y=event.resize.h;
-				screen_resize(event.resize.w, event.resize.h);
-				break;
-				case SDL_QUIT:
-				neo_emu_done = 1;
-				break;
-				default:
-				break;
-			}
-		}
-
-		/* update the internal representation of keyslot */
-		update_p1_key();
-		update_p2_key();
-		update_start();
-		update_coin();
-
-#endif
-
-		if (slow_motion)
-			SDL_Delay(100);
+		if (slow_motion) SDL_Delay(100);
 
 #ifndef ENABLE_940T
 		if (conf.sound) {
@@ -653,32 +479,21 @@ void main_loop(void) {
 				cpu_z80_run(cpu_z80_timeslice_interlace);
 				my_timer();
 			}
-
-			//cpu_z80_run(cpu_z80_timeslice);
 			PROFILER_STOP(PROF_Z80);
-		} /*
-		 else
-		 my_timer();*/
+		}
+		// else my_timer();
+
 #endif
 #ifdef ENABLE_940T
 		if (conf.sound) {
 			PROFILER_START(PROF_Z80);
 			wait_busy_940(JOB940_RUN_Z80);
-#if 0
-			if (gp2x_timer) {
-				gp2x_timer_prev=gp2x_timer;
-				gp2x_timer=gp2x_memregl[0x0A00>>2];
-				shared_ctl->sample_todo=(unsigned int)(((gp2x_timer-gp2x_timer_prev)*conf.sample_rate)/7372800.0);
-			} else {
-				gp2x_timer=gp2x_memregl[0x0A00>>2];
-				shared_ctl->sample_todo=sample_len;
-			}
-#endif
 			gp2x_add_job940(JOB940_RUN_Z80);
 			PROFILER_STOP(PROF_Z80);
 		}
 
 #endif
+
 
 		if (!conf.debug) {
 			if (conf.raster) {
@@ -690,7 +505,6 @@ void main_loop(void) {
 						cpu_68k_interrupt(2);
 				}
 				tm_cycle = cpu_68k_run(cpu_68k_timeslice_scanline - tm_cycle);
-				//state_handling(pending_save_state, pending_load_state);
 
 				update_screen();
 				memory.watchdog++;
@@ -704,9 +518,6 @@ void main_loop(void) {
 				tm_cycle = cpu_68k_run(cpu_68k_timeslice - tm_cycle);
 				PROFILER_STOP(PROF_68K);
 				a = neo_interrupt();
-
-				/* state handling (we save/load before interrupt) */
-				//state_handling(pending_save_state, pending_load_state);
 
 				memory.watchdog++;
 
@@ -724,11 +535,13 @@ void main_loop(void) {
 			neo_emu_done = 1;
 		}
 
+
 #ifdef ENABLE_PROFILER
 		profiler_show_stat();
 #endif
 		PROFILER_START(PROF_ALL);
 	}
+
 	pause_audio(1);
 #ifdef ENABLE_940T
 	wait_busy_940(JOB940_RUN_Z80);
@@ -758,7 +571,6 @@ void cpu_68k_dpg_step(void) {
 		} else {
 			neo_interrupt();
 		}
-		//state_handling(pending_save_state, pending_load_state);
 		cpu_68k_interrupt(1);
 	} else {
 		if (line_cycle >= cpu_68k_timeslice_scanline) {

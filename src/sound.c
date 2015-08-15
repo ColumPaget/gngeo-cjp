@@ -74,26 +74,23 @@ void update_sdl_stream(void *userdata, Uint8 * stream, int len)
 #ifdef ENABLE_940T
 	if (shared_ctl->buf_pos >= play_buffer_pos && 
 	    shared_ctl->buf_pos <= play_buffer_pos + len) {
-		//printf("SOUND WARN 1 %d %d\n",shared_ctl->buf_pos,play_buffer_pos);
-		
+		printf("SOUND WARN 1 %d %d\n",shared_ctl->buf_pos,play_buffer_pos);
 		return;
 	}
 	if (shared_ctl->buf_pos + shared_ctl->sample_len >= play_buffer_pos && 
 	    shared_ctl->buf_pos + shared_ctl->sample_len <= play_buffer_pos + len) {
-		//printf("SOUND WARN 2 %d %d\n",shared_ctl->buf_pos,play_buffer_pos);
-		
+		printf("SOUND WARN 2 %d %d\n",shared_ctl->buf_pos,play_buffer_pos);
 		return;
 	}
+
 	if ( play_buffer_pos+len>SAMPLE_BUFLEN) {
 		unsigned int last=(SAMPLE_BUFLEN-play_buffer_pos);
 		memcpy(stream, (Uint8 *) shared_ctl->play_buffer+ play_buffer_pos, last);
 		memcpy(stream+last, (Uint8 *) shared_ctl->play_buffer, len-last);
-		//printf("Case 1\n");
 		play_buffer_pos=len-last;
 	} else {
 		memcpy(stream, (Uint8 *) shared_ctl->play_buffer+play_buffer_pos, len);
 		play_buffer_pos+=len;
-		//printf("Case 2\n");
 	}
 
 
@@ -106,6 +103,8 @@ void update_sdl_stream(void *userdata, Uint8 * stream, int len)
 	PROFILER_STOP(PROF_SOUND);
 
 }
+
+
 void dummy_stream(void *userdata, Uint8 * stream, int len) {
 }
 
@@ -130,7 +129,7 @@ int init_sdl_audio(void)
 	 
 	//desired->callback = NULL;
     desired->userdata = NULL;
-    //SDL_OpenAudio(desired, NULL);
+
     SDL_OpenAudio(desired, obtain);
     printf("Obtained sample rate: %d\n",obtain->freq);
     conf.sample_rate=obtain->freq;
@@ -138,6 +137,7 @@ int init_sdl_audio(void)
 }
 
 void close_sdl_audio(void) {
+
     SDL_PauseAudio(1);
     SDL_CloseAudio();
     SDL_QuitSubSystem(SDL_INIT_AUDIO);
@@ -148,7 +148,6 @@ void close_sdl_audio(void) {
 }
 
 void pause_audio(int on) {
-	printf("PAUSE audio %d\n",on);
     SDL_PauseAudio(on);
 }
 
@@ -160,7 +159,6 @@ int buflen=0;
 
 
 void *fill_audio_data(void *ptr) {
-    printf("Update audio\n");
 
     while(1) {
 

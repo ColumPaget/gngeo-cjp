@@ -49,6 +49,7 @@
 #include "fileio.h"
 #include "sound.h"
 #include "effect.h"
+#include "timer.h"
 
 #if defined (WII)
 #define ROOTPATH "sd:/apps/gngeo/"
@@ -867,7 +868,7 @@ static int load_state_action(GN_MENU_ITEM *self, void *param) {
 			case GN_B:
 			case GN_C:
 				load_state(conf.game, slot);
-				printf("Load state!!\n");
+				my_timer(true);
 				return MENU_RETURNTOGAME;
 				break;
 			default:
@@ -991,12 +992,7 @@ int menu_event_handling(struct GN_MENU *self) {
 			mi = gn_menu_get_item_by_index(self, self->current);
 			if (mi && mi->action) {
 				reset_event();
-				if ((a = mi->action(mi, NULL))>0)
-/*
-					if (a == MENU_CLOSE) return MENU_STAY;
-					else
-*/
-						return a;
+				if ((a = mi->action(mi, NULL))>0) return a;
 			}
 			break;
 		default:
@@ -1332,9 +1328,9 @@ static int change_samplerate_action(GN_MENU_ITEM *self, void *param) {
 		conf.sound = 1;
 		CF_BOOL(cf_get_item_by_name("sound")) = 1;
 		conf.sample_rate = rate;
-		//init_sdl_audio();
-		//YM2610ChangeSamplerate(conf.sample_rate);
-		if (conf.game) {
+
+		if (conf.game) 
+		{
 			init_sdl_audio();
 			YM2610ChangeSamplerate(conf.sample_rate);
 		}
