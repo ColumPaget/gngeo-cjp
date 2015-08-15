@@ -527,10 +527,14 @@ int gn_init_skin(void) {
 	gngeo_logo = res_load_stbi("skin/gngeo.tga");
 	gngeo_mask = res_load_stbi("skin/gngeo_mask.tga");
 
-	printf("gngeo_logo: %d\n",gngeo_logo);
-	pbar_logo = SDL_CreateRGBSurface(SDL_SWSURFACE, gngeo_logo->w, gngeo_logo->h, 32, 0xFF, 0xFF00, 0xFF0000, 0xFF000000);
-	SDL_SetAlpha(gngeo_logo, 0, 0);
+	if (gngeo_logo)
+	{
+		pbar_logo = SDL_CreateRGBSurface(SDL_SWSURFACE, gngeo_logo->w, gngeo_logo->h, 32, 0xFF, 0xFF00, 0xFF0000, 0xFF000000);
+		SDL_SetAlpha(gngeo_logo, 0, 0);
+	}
+	else printf("warning: failed to load gngeo logo\n");
 	//SDL_SetAlpha(gngeo_mask,0,0);
+
 	init_back();
 
 	if (!back || !sfont || !mfont || !arrow_r || !arrow_l || !arrow_u || !arrow_d ||
