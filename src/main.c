@@ -96,47 +96,52 @@ void sdl_set_title(char *name) {
     }
 }
 
-void init_sdl(void /*char *rom_name*/) {
-    int surface_type = (CF_BOOL(cf_get_item_by_name("hwsurface"))? SDL_HWSURFACE : SDL_SWSURFACE);
 
-
-    char *nomouse = getenv("SDL_NOMOUSE");
-    SDL_Surface *icon;
-
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_NOPARACHUTE);
-
-#ifdef GP2X
-    atexit(gp2x_quit);
-#else
-    atexit(SDL_Quit);
-#endif
-
-    if (screen_init() == SDL_FALSE) {
-	printf("Screen initialization failed.\n");
-	exit(-1);
-    }
-
-    buffer = SDL_CreateRGBSurface(surface_type, 352, 256, 16, 0xF800, 0x7E0,
-				  0x1F, 0);
-    SDL_FillRect(buffer,NULL,SDL_MapRGB(buffer->format,0xE5,0xE5,0xE5));
-
-    fontbuf = SDL_CreateRGBSurfaceFrom(font_image.pixel_data, font_image.width, font_image.height
-				       , 24, font_image.width * 3, 0xFF0000, 0xFF00, 0xFF, 0);
-    SDL_SetColorKey(fontbuf,SDL_SRCCOLORKEY,SDL_MapRGB(fontbuf->format,0xFF,0,0xFF));
-    fontbuf=SDL_DisplayFormat(fontbuf);
-    icon = SDL_CreateRGBSurfaceFrom(gngeo_icon.pixel_data, gngeo_icon.width,
-				    gngeo_icon.height, gngeo_icon.bytes_per_pixel*8,
-				    gngeo_icon.width * gngeo_icon.bytes_per_pixel,
-				    0xFF, 0xFF00, 0xFF0000, 0);
-    
-    SDL_WM_SetIcon(icon,NULL);
-
-    calculate_hotkey_bitmasks();    
+void init_sdl(void /*char *rom_name*/) 
+{
+	int surface_type = (CF_BOOL(cf_get_item_by_name("hwsurface"))? SDL_HWSURFACE : SDL_SWSURFACE);
+	
+	
+	char *nomouse = getenv("SDL_NOMOUSE");
+	SDL_Surface *icon;
+	
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_NOPARACHUTE);
+	
+	#ifdef GP2X
+	atexit(gp2x_quit);
+	#else
+	atexit(SDL_Quit);
+	#endif
+	
+	if (screen_init() == SDL_FALSE)
+	{
+		printf("Screen initialization failed.\n");
+		exit(-1);
+	}
+	
+	buffer = SDL_CreateRGBSurface(surface_type, 352, 256, 16, 0xF800, 0x7E0, 0x1F, 0);
+	SDL_FillRect(buffer,NULL,SDL_MapRGB(buffer->format,0xE5,0xE5,0xE5));
+	
+	fontbuf = SDL_CreateRGBSurfaceFrom(font_image.pixel_data, font_image.width, font_image.height
+					       , 24, font_image.width * 3, 0xFF0000, 0xFF00, 0xFF, 0);
+	SDL_SetColorKey(fontbuf,SDL_SRCCOLORKEY,SDL_MapRGB(fontbuf->format,0xFF,0,0xFF));
+	fontbuf=SDL_DisplayFormat(fontbuf);
+	icon = SDL_CreateRGBSurfaceFrom(gngeo_icon.pixel_data, gngeo_icon.width,
+					    gngeo_icon.height, gngeo_icon.bytes_per_pixel*8,
+					    gngeo_icon.width * gngeo_icon.bytes_per_pixel,
+					    0xFF, 0xFF00, 0xFF0000, 0);
+	
+	SDL_WM_SetIcon(icon,NULL);
+	
+	calculate_hotkey_bitmasks();    
 	init_event();
-
-    //if (nomouse == NULL)
+	
+	//if (nomouse == NULL)
 	//SDL_ShowCursor(SDL_DISABLE);
-}
+	}
+
+
+
 static void catch_me(int signo) {
 	printf("Catch a sigsegv\n");
 	//SDL_Quit();
@@ -144,7 +149,7 @@ static void catch_me(int signo) {
 }
 int main(int argc, char *argv[])
 {
-    char *rom_name;
+    char *rom_name=NULL;
 
 
 
@@ -152,7 +157,9 @@ int main(int argc, char *argv[])
     BPTR file_lock = GetProgramDir();
     SetProgramDir(file_lock);
 #endif
-	signal(SIGSEGV, catch_me);
+
+	//Don't fucking catch sigsegvs!! Fix them!
+	//signal(SIGSEGV, catch_me);
 
 #ifdef WII
 	//   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_NOPARACHUTE);
@@ -162,19 +169,28 @@ int main(int argc, char *argv[])
 
     cf_init(); /* must be the first thing to do */
     cf_init_cmd_line();
-    cf_open_file(NULL); /* Open Default configuration file */
 
-    rom_name=cf_parse_cmd_line(argc,argv);
+		cf_parse_cmd_line(argc,argv, &rom_name);
+printf("PC:: %s\n",cf_get_string_by_name("config"));
+    cf_open_file(cf_get_string_by_name("config")); /* Open Default configuration file */
+printf("EF:: %s\n",cf_get_string_by_name("effect"));
+		//cf_parse_cmd_line(argc,argv, &rom_name);
+printf("EF2:: %s\n",cf_get_string_by_name("effect"));
+
+//printf("rom_name: %s\n",rom_name);
 
     /* print effect/blitter list if asked by user */
-    if (!strcmp(CF_STR(cf_get_item_by_name("effect")),"help")) {
-	print_effect_list();
-	exit(0);
+    if (! strcmp(cf_get_string_by_name("effect"),"help"))
+		{
+			print_effect_list();
+			exit(0);
     }
-    if (!strcmp(CF_STR(cf_get_item_by_name("blitter")),"help")) {
+
+if (!strcmp(cf_get_string_by_name("blitter"),"help"));
+{
 	print_blitter_list();
-	exit(0);
-    }
+	//exit(0);
+}
 
 	init_sdl();
 

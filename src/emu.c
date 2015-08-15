@@ -340,6 +340,7 @@ void main_loop(void) {
 
 	Uint32 cpu_z80_timeslice_interlace = cpu_z80_timeslice
 			/ (float) nb_interlace;
+	int interp;
 
 #ifdef GP2X
 	gp2x_sound_volume_set(snd_volume, snd_volume);
@@ -354,15 +355,112 @@ void main_loop(void) {
 			conf.test_switch = 0;
 
 		//neo_emu_done=
-		if (handle_event()) {
-			int interp = interpolation;
-			SDL_BlitSurface(buffer, &buf_rect, state_img, &screen_rect);
-			interpolation = 0;
-			if (conf.sound) pause_audio(1);
-			if (run_menu() == 2) {
+		switch (handle_event())
+		 {
+			case EV_MENU:
+				interp=interpolation;
+				SDL_BlitSurface(buffer, &buf_rect, state_img, &screen_rect);
+				interpolation = 0;
+				if (conf.sound) pause_audio(1);
+				if (run_menu() == 2) {
 				neo_emu_done = 1;/*printf("Unlock audio\n");SDL_UnlockAudio()*/
 				return;
-			} // A bit ugly...
+			break;
+
+			case EV_TEST_SWITCH:
+					draw_message("Test Switch ON");
+					conf.test_switch = 1;
+					break;
+			break;
+
+			case EV_RESET_EMU:
+					draw_message("Reset");
+					//neogeo_init();
+					cpu_68k_reset();
+					break;
+
+			case EV_SCREENSHOT:
+					take_screenshot();
+					draw_message("Screenshot saved");
+					break;
+
+			case EV_SHOW_FPS:
+					conf.show_fps ^= SDL_TRUE;
+			break;
+
+			case EV_SHOW_KEYSYM:
+				//this is handled in event.c, because that's where the keysyms are
+			break;
+
+			case EV_SLOW_MOTION:
+					slow_motion = 1 - slow_motion;
+					if (slow_motion)
+					draw_message("SlowMotion : ON");
+					else {
+						draw_message("SlowMotion : OFF");
+						reset_frame_skip();
+					}
+				break;
+
+					case EV_AUTOFRAMESKIP:
+					conf. autoframeskip ^= SDL_TRUE;
+					if (conf.autoframeskip) {
+						reset_frame_skip();
+						draw_message("AutoFrameSkip : ON");
+					} else
+					draw_message("AutoFrameSkip : OFF");
+					break;
+
+					case EV_SLEEPIDLE:
+					conf.sleep_idle ^= SDL_TRUE;
+					if (conf.sleep_idle)
+					draw_message("Sleep idle : ON");
+					else
+					draw_message("Sleep idle : OFF");
+					break;
+
+					case EV_FULLSCREEN:
+					screen_fullscreen();
+					break;
+
+
+/*
+					case SDLK_F7:
+					//screen_set_effect("scanline");
+					if (conf.debug) {
+						dbg_step = 1;
+					}
+					break;
+
+
+					case SDLK_F8:
+					{
+						int val;
+						char *endptr;
+						text_input("Save to slot [0-999]? ",16,227,input_buf,3);
+						val=strtol(input_buf,&endptr,10);
+						if (input_buf != endptr) {
+							pending_save_state=val+1;
+						}
+					}
+					break;
+					case SDLK_F9:
+					{
+						int val;
+						char *endptr;
+						text_input("Load from slot [0-999]? ",16,227,input_buf,3);
+						val=strtol(input_buf,&endptr,10);
+						if (input_buf != endptr) {
+							pending_load_state=val+1;
+						}
+					}
+					break;
+*/
+
+	
+			}
+
+			// A bit ugly...
 			if (conf.sound) pause_audio(0);
 			//neo_emu_done = 1;
 			interpolation = interp;
@@ -520,85 +618,7 @@ void main_loop(void) {
 					 main_gngeo_gui();
 					 break;
 					 */
-					case SDLK_F1:
-					draw_message("Reset");
-					//neogeo_init();
-					cpu_68k_reset();
-					break;
-					case SDLK_F2:
-					take_screenshot();
-					draw_message("Screenshot saved");
-					break;
-					case SDLK_F3:
-					draw_message("Test Switch ON");
-					conf.test_switch = 1;
-					break;
-					case SDLK_F5:
-					show_fps ^= SDL_TRUE;
-					break;
-					case SDLK_F4:
-					show_keysym = 1 - show_keysym;
-					if (show_keysym)
-					draw_message("Show keysym code : ON");
-					else
-					draw_message("Show keysym code : OFF");
-					break;
-					case SDLK_F6:
-					slow_motion = 1 - slow_motion;
-					if (slow_motion)
-					draw_message("SlowMotion : ON");
-					else {
-						draw_message("SlowMotion : OFF");
-						reset_frame_skip();
-					}
-					break;
-					case SDLK_F7:
-					//screen_set_effect("scanline");
-					if (conf.debug) {
-						dbg_step = 1;
-					}
-					break;
-					case SDLK_F8:
-					{
-						int val;
-						char *endptr;
-						text_input("Save to slot [0-999]? ",16,227,input_buf,3);
-						val=strtol(input_buf,&endptr,10);
-						if (input_buf != endptr) {
-							pending_save_state=val+1;
-						}
-					}
-					break;
-					case SDLK_F9:
-					{
-						int val;
-						char *endptr;
-						text_input("Load from slot [0-999]? ",16,227,input_buf,3);
-						val=strtol(input_buf,&endptr,10);
-						if (input_buf != endptr) {
-							pending_load_state=val+1;
-						}
-					}
-					break;
-					case SDLK_F10:
-					autoframeskip ^= SDL_TRUE;
-					if (autoframeskip) {
-						reset_frame_skip();
-						draw_message("AutoFrameSkip : ON");
-					} else
-					draw_message("AutoFrameSkip : OFF");
-					break;
-					case SDLK_F11:
-					sleep_idle ^= SDL_TRUE;
-					if (sleep_idle)
-					draw_message("Sleep idle : ON");
-					else
-					draw_message("Sleep idle : OFF");
-					break;
-					case SDLK_F12:
-					screen_fullscreen();
-					break;
-				}
+			}
 				break;
 #endif
 				case SDL_VIDEORESIZE:

@@ -655,7 +655,7 @@ void draw_screen(void) {
 	SDL_UnlockSurface(buffer);
 
 	if (conf.do_message) {
-		SDL_textout(buffer, visible_area.x, visible_area.h + visible_area.y - 13, conf.message);
+		SDL_textout(buffer, visible_area.x + 10, visible_area.h + visible_area.y - 13, conf.message);
 		conf.do_message--;
 	}
 	if (conf.show_fps)

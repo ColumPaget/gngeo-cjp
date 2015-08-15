@@ -3,6 +3,23 @@
 
 #include "SDL.h"
 
+
+//values returned by handle_event. EVMENU takes us back to the menu
+//the others are ignored, but are used to prevent certain keypresses
+//being considered in the main event loop
+#define EV_GAME 1
+#define EV_MENU 2
+#define EV_TEST_SWITCH 3
+#define EV_RESET_EMU 4
+#define EV_SCREENSHOT 5
+#define EV_SHOW_FPS 6
+#define EV_SHOW_KEYSYM 7
+#define EV_SLOW_MOTION 8
+#define EV_AUTOFRAMESKIP 9
+#define EV_SLEEPIDLE 10
+#define EV_FULLSCREEN 11
+
+
 typedef enum {
 	GN_NONE=0,
 	GN_A,

@@ -1218,7 +1218,7 @@ bool dr_load_bios(GAME_ROMS *r) {
 	ZFILE *z;
 	size_t totread = 0;
 	unsigned int size;
-	char *rpath = CF_STR(cf_get_item_by_name("rompath"));
+	char *rpath = cf_get_string_by_name("rompath");
 	char *fpath;
 	char *romfile;
 	fpath = malloc(strlen(rpath) + strlen("neogeo.zip") + 2);
@@ -1500,7 +1500,7 @@ error1:
 
 bool dr_load_game(char *name) {
 	//GAME_ROMS rom;
-	char *rpath = CF_STR(cf_get_item_by_name("rompath"));
+	char *rpath = cf_get_string_by_name("rompath");
 	int rc;
 	printf("Loading %s/%s.zip\n", rpath, name);
 	memory.bksw_handler = 0;

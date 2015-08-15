@@ -45,6 +45,7 @@
 #include "emu.h"
 #include "fileio.h"
 #include "memory.h"
+#include "utility_functions.h"
 
 #if defined (__AMIGA__)
 #ifdef DATA_DIRECTORY
@@ -133,8 +134,8 @@ void cf_cache_conf(void) {
 #ifdef GP2X
 	conf.accurate940 = CF_BOOL(cf_get_item_by_name("940sync"));
 #endif
-	country = CF_STR(cf_get_item_by_name("country"));
-	system = CF_STR(cf_get_item_by_name("system"));
+	country = cf_get_string_by_name("country");
+	system = cf_get_string_by_name("system");
 	if (!strcmp(system, "unibios")) {
 		conf.system = SYS_UNIBIOS;
 	} else {
@@ -184,7 +185,7 @@ static char **read_str_array(char *val, int *size) {
 	v = strtok(val, ",");
 	printf("V1=%s\n", v);
 	for (i = 0; i < nb_elem; i++) {
-		tab[i] = strdup(v);
+		tab[i] = rstrcpy(tab[i], v, 256);
 		v = strtok(NULL, ",");
 		printf("V%d=%s\n", i, v);
 	}
@@ -199,8 +200,8 @@ static CONF_ITEM * create_conf_item(const char *name, const char *help, char sho
 
 	a = tolower((int) name[0]);
 
-	t->name = strdup(name);
-	t->help = strdup(help);
+	t->name = rstrcpy(t->name, name, 256);
+	t->help = rstrcpy(t->help, help, 4096);
 	t->modified = 0;
 	if (short_opt == 0) {
 		val++;
@@ -251,8 +252,8 @@ void cf_create_action_arg_item(const char *name, const char *help, const char *h
 void cf_create_string_item(const char *name, const char *help, const char *hlp_arg, char short_opt, const char *def) {
 	CONF_ITEM *t = create_conf_item(name, help, short_opt, NULL);
 	t->type = CFT_STRING;
-	strcpy(t->data.dt_str.str, def);
-	t->data.dt_str.default_str = strdup(def);
+	t->data.dt_str.str=rstrcpy(t->data.dt_str.str, def, 256);
+	t->data.dt_str.default_str=rstrcpy(t->data.dt_str.default_str, def, 256);
 	t->help_arg = (char *) hlp_arg;
 }
 
@@ -278,24 +279,52 @@ void cf_create_str_array_item(const char *name, const char *help, const char *hl
 	CONF_ITEM *t = create_conf_item(name, help, short_opt, NULL);
 	t->type = CFT_STR_ARRAY;
 	t->data.dt_str_array.size = 0; /* Calculated on the fly */
-	if (def != NULL)
-		t->data.dt_str_array.array = read_str_array(def, &t->data.dt_str_array.size);
-	else
-		t->data.dt_str_array.array = NULL;
-	t->data.dt_str_array.default_array = strdup(def);
+	if (def != NULL) t->data.dt_str_array.array = read_str_array(def, &t->data.dt_str_array.size);
+	else t->data.dt_str_array.array = NULL;
+
+	//replaced strdup
+	t->data.dt_str_array.default_array = rstrcpy(t->data.dt_str_array.default_array, def, 256);
 	t->help_arg = (char *) hlp_arg;
 }
 
 CONF_ITEM* cf_get_item_by_name(const char *name) {
 	int i;
 	int a = tolower((int) name[0]);
+	char *ptr;
 
-	for (i = 0; i < cf_hash[a].nb_item; i++) {
-		if (strcasecmp(cf_hash[a].conf[i]->name, name) == 0)
-			return cf_hash[a].conf[i];
+	for (i = 0; i < cf_hash[a].nb_item; i++) 
+	{
+		ptr=cf_hash[a].conf[i]->name;
+		if (ptr && (strcasecmp(ptr, name) == 0)) return cf_hash[a].conf[i];
 	}
+
 	return NULL;
 }
+
+
+char *cf_get_string_by_name(const char *name) 
+{
+CONF_ITEM *Item;
+
+Item=cf_get_item_by_name(name);
+if (! Item) return("");
+
+if (Item->data.dt_str.str) return(Item->data.dt_str.str);
+return("");
+}
+
+void cf_set_string_by_name(const char *name, char *value) 
+{
+CONF_ITEM *Item;
+
+Item=cf_get_item_by_name(name);
+if (Item) 
+{
+Item->data.dt_str.str=rstrcpy(Item->data.dt_str.str, value, 1024);
+}
+}
+
+
 
 CONF_ITEM* cf_get_item_by_val(int val) {
 	int i, j;
@@ -358,7 +387,7 @@ static int print_help(CONF_ITEM *self) {
 static int show_all_game(CONF_ITEM *self) {
 	printf("Not implemented yet\n");
 	/*
-		dr_load_driver_dir(CF_STR(cf_get_item_by_name("romrcdir")));
+		dr_load_driver_dir(cf_get_string_by_name("romrcdir"));
 	#if ! defined (GP2X) && ! defined (WIN32)
 		{
 	#if defined (__AMIGA__)
@@ -374,7 +403,7 @@ static int show_all_game(CONF_ITEM *self) {
 		}
 	#endif
 
-		//dr_load_driver(CF_STR(cf_get_item_by_name("romrc")));
+		//dr_load_driver(cf_get_string_by_name("romrc"));
 		dr_list_all();//list_game();
 	 */
 	return 0;
@@ -392,6 +421,7 @@ void cf_init(void) {
 	cf_create_action_item("help", "Print this help and exit", 'h', print_help);
 	cf_create_action_item("listgame", "Show all the game available in the romrc", 'l', show_all_game);
 	cf_create_action_item("version", "Show version and exit", 'v', show_version);
+	cf_create_string_item("config", "Path to config file", "PATH", 'c', "");
 
 	cf_create_bool_item("forcepc", "Force the PC to a correct value at startup", 0, false);
 	cf_create_bool_item("dump", "Create a gno dump in the current dir and exit", 0, false);
@@ -655,7 +685,7 @@ void cf_reset_to_default(void) {
 	for (i = 0; i < 128; i++) {
 		for (j = 0; j < cf_hash[i].nb_item; j++) {
 			cf = cf_hash[i].conf[j];
-			if (!cf->modified && !(cf->flags & CF_SETBYCMD)) {
+			if (cf && !cf->modified && !(cf->flags & CF_SETBYCMD)) {
 				switch (cf->type) {
 					case CFT_INT:
 						CF_VAL(cf) = cf->data.dt_int.default_val;
@@ -664,7 +694,7 @@ void cf_reset_to_default(void) {
 						CF_BOOL(cf) = cf->data.dt_bool.default_bool;
 						break;
 					case CFT_STRING:
-						strncpy(CF_STR(cf), cf->data.dt_str.default_str, 254);
+						CF_STR(cf)=rstrcpy(CF_STR(cf), cf->data.dt_str.default_str, 254);
 						break;
 					case CFT_ARRAY:
 						memcpy(cf->data.dt_array.array, cf->data.dt_array.default_array,
@@ -679,7 +709,8 @@ void cf_reset_to_default(void) {
 	}
 }
 
-bool cf_open_file(char *filename) {
+bool cf_open_file(char *filename) 
+{
 	/* if filename==NULL, we use the default one: $HOME/.gngeo/gngeorc */
 	char *conf_file = filename;
 	FILE *f;
@@ -689,7 +720,8 @@ bool cf_open_file(char *filename) {
 	char val[255];
 	CONF_ITEM *cf;
 
-	if (!conf_file) {
+	if (! sstrlen(conf_file)) 
+	{
 #ifdef EMBEDDED_FS
 		int len = strlen("gngeorc") + strlen(ROOTPATH"conf/") + 1;
 		conf_file = (char *) alloca(len * sizeof (char));
@@ -704,10 +736,12 @@ bool cf_open_file(char *filename) {
 		sprintf(conf_file, "%s/.gngeo/gngeorc", getenv("HOME"));
 #endif
 	}
+
 	if ((f = fopen(conf_file, "rb")) == 0) {
 		//printf("Unable to open %s\n",conf_file);
 		return false;
 	}
+printf("OPEN: %s\n",conf_file);
 
 	while (!feof(f)) {
 		i = 0;
@@ -733,7 +767,7 @@ bool cf_open_file(char *filename) {
 					CF_BOOL(cf) = (strcasecmp(val, "true") == 0 ? true : false);
 					break;
 				case CFT_STRING:
-					strncpy(CF_STR(cf), val, 254);
+					CF_STR(cf)=rstrcpy(CF_STR(cf), val, 254);
 					break;
 				case CFT_ARRAY:
 					read_array(CF_ARRAY(cf), val, CF_ARRAY_SIZE(cf));
@@ -758,16 +792,15 @@ bool cf_open_file(char *filename) {
 
 
 static struct option *longopt;
-//static struct option *fake_longopt;
 
-static void add_long_opt_item(char *name, int has_arg, int *flag, int val) {
+static void add_long_opt_item(char *name, int has_arg, int *flag, int val)
+{
 	static int opt_size = 0;
 	static int opt = 0;
 
 	if (opt >= opt_size) {
 		opt_size += 10;
 		longopt = realloc(longopt, (opt_size + 1) * sizeof (struct option));
-		//fake_longopt=realloc(fake_longopt,(opt_size+1)*sizeof(struct option));
 	}
 
 	longopt[opt].name = name;
@@ -775,12 +808,6 @@ static void add_long_opt_item(char *name, int has_arg, int *flag, int val) {
 	longopt[opt].flag = flag;
 	longopt[opt].val = val;
 
-	/*
-		fake_longopt[opt].name=name;
-		fake_longopt[opt].has_arg=has_arg;
-		fake_longopt[opt].flag=NULL;
-		fake_longopt[opt].val=0;
-	 */
 	opt++;
 }
 
@@ -836,7 +863,8 @@ void cf_init_cmd_line(void) {
 
 }
 
-char* cf_parse_cmd_line(int argc, char *argv[]) {
+int cf_parse_cmd_line(int argc, char *argv[], char **romname) 
+{
 	int c;
 	CONF_ITEM *cf;
 
@@ -845,53 +873,46 @@ char* cf_parse_cmd_line(int argc, char *argv[]) {
 #ifdef WII
 	return NULL;
 #endif
-	while ((c = getopt_long(argc, argv, shortopt, longopt, &option_index)) != EOF) {
-		//if (c != 0) {
+	while ((c = getopt_long(argc, argv, shortopt, longopt, &option_index)) != EOF) 
+	{
 			printf("c=%d\n",c);
 			cf = cf_get_item_by_val(c&0xFFF);
-			if (cf) {
+			if (cf) 
+			{
 				cf->flags |= CF_SETBYCMD;
 				printf("flags %s set on cmd line\n", cf->name);
-				switch (cf->type) {
-
+				switch (cf->type)
+				{
 					case CFT_INT:
 						CF_VAL(cf) = atoi(optarg);
 						break;
 					case CFT_BOOLEAN:
-					if (c & 0x1000)
-						CF_BOOL(cf) = 0;
-					else
-						CF_BOOL(cf) = 1;
+					if (c & 0x1000) CF_BOOL(cf) = 0;
+					else CF_BOOL(cf) = 1;
 						break;
 					case CFT_STRING:
-						strcpy(CF_STR(cf), optarg);
-						//printf("conf %s %s\n",CF_STR(cf),optarg);
+						CF_STR(cf)=rstrcpy(CF_STR(cf), optarg, 254);
 						break;
 					case CFT_ARRAY:
 						read_array(CF_ARRAY(cf), optarg, CF_ARRAY_SIZE(cf));
 						break;
 					case CFT_ACTION_ARG:
 						strcpy(CF_STR(cf), optarg);
-						if (cf->action) {
-							exit(cf->action(cf));
-						}
+						if (cf->action) exit(cf->action(cf));
 						break;
 					case CFT_ACTION:
-						if (cf->action) {
-							exit(cf->action(cf));
-						}
+						if (cf->action) exit(cf->action(cf));
 						break;
 					case CFT_STR_ARRAY:
 						/* TODO */
 						break;
 				}
-			//}
-		}
+			}
 	}
 	cf_cache_conf();
-	if (optind >= argc)
-		return NULL;
 
-	return strdup(argv[optind]);
+	if (optind >= argc) return(0);
+	*romname=argv[optind];
+	return(1);
 }
 

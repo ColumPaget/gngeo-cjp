@@ -241,47 +241,61 @@ bool close_game(void) {
     return true;
 }
 
-bool load_game_config(char *rom_name) {
+bool load_game_config(char *rom_name)
+{
 	char *gpath;
-	char *drconf;
+	char *drconf=NULL;
+
 #ifdef EMBEDDED_FS
     gpath=ROOTPATH"conf/";
 #else
     gpath=get_gngeo_dir();
 #endif
-	cf_reset_to_default();
-	cf_open_file(NULL); /* Reset possible previous setting */
-	if (rom_name) {
-		if (strstr(rom_name,".gno")!=NULL) {
+
+if (rom_name) 
+{
+	if (strstr(rom_name,".gno") != NULL) 
+	{
 			char *name=dr_gno_romname(rom_name);
-			if (name) {
+			if (name) 
+			{
 				printf("Tring to load a gno file %s %s\n",rom_name,name);
-				drconf=alloca(strlen(gpath)+strlen(name)+strlen(".cf")+1);
+				drconf=(char *) realloc(drconf, strlen(gpath)+strlen(name)+strlen(".cf")+1);
 				sprintf(drconf,"%s%s.cf",gpath,name);
-			} else {
+			} 
+			else 
+			{
 				printf("Error while loading %s\n",rom_name);
 				return false;
 			}
-		} else {
-			drconf=alloca(strlen(gpath)+strlen(rom_name)+strlen(".cf")+1);
-			sprintf(drconf,"%s%s.cf",gpath,rom_name);
-		}
-		cf_open_file(drconf);
 	}
-	return true;
+	else
+	{
+			drconf=(char *) realloc(drconf, strlen(gpath)+strlen(rom_name)+strlen(".cf")+1);
+			sprintf(drconf,"%s%s.cf",gpath,rom_name);
+	}
+
+	if (access(drconf,F_OK)==0)
+	{
+	cf_reset_to_default();
+	cf_open_file(NULL); // Reset possible previous setting 
+	cf_open_file(drconf);
+	}
+}
+
+
+if (drconf) free(drconf);
+return true;
 }
 
 bool init_game(char *rom_name) {
-printf("AAA Blitter %s effect %s\n",CF_STR(cf_get_item_by_name("blitter")),CF_STR(cf_get_item_by_name("effect")));
-
+printf("AAA Blitter %s effect %s\n",cf_get_string_by_name("blitter"),cf_get_string_by_name("effect"));
 	load_game_config(rom_name);
-	/* reinit screen if necessary */
-	//screen_change_blitter_and_effect(NULL,NULL);
 	reset_frame_skip();
 	screen_reinit();
-	printf("BBB Blitter %s effect %s\n",CF_STR(cf_get_item_by_name("blitter")),CF_STR(cf_get_item_by_name("effect")));
+	printf("BBB Blitter %s effect %s\n",cf_get_string_by_name("blitter"),cf_get_string_by_name("effect"));
     /* open transpack if need */
-    trans_pack_open(CF_STR(cf_get_item_by_name("transpack")));
+    trans_pack_open(cf_get_string_by_name("transpack"));
 
     if (strstr(rom_name, ".gno") != NULL) {
         dr_open_gno(rom_name);

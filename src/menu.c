@@ -1107,7 +1107,7 @@ static int loadrom_action(GN_MENU_ITEM *self, void *param) {
 void init_rom_browser_menu(void) {
 	int i;
 	int nbf;
-	char filename[strlen(CF_STR(cf_get_item_by_name("rompath"))) + 256];
+	char *filename = NULL, *p_rompath;
 	struct stat filestat;
 	struct dirent **namelist;
 	ROM_DEF *drv = NULL;
@@ -1117,10 +1117,15 @@ void init_rom_browser_menu(void) {
 
 
 	i = 0;
-	while (romlist[i]) {
-		sprintf(filename, "%s/%s.zip", CF_STR(cf_get_item_by_name("rompath")), romlist[i]);
+	while (romlist[i]) 
+	{
+		p_rompath=cf_get_string_by_name("rompath");
+		filename=realloc(filename, strlen(p_rompath) + 256);
+		sprintf(filename, "%s/%s.zip", p_rompath, romlist[i]);
+
 		if (stat(filename, &filestat) == 0 && S_ISREG(filestat.st_mode)) {
-			if ((drv = dr_check_zip(filename)) != NULL) {
+			if ((drv = dr_check_zip(filename)) != NULL) 
+			{
 				rbrowser_menu->item = list_insert_sort(rbrowser_menu->item,
 						(void*) gn_menu_create_item(drv->longname, MENU_ACTION, loadrom_action, strdup(drv->name)),
 						romnamesort
@@ -1136,8 +1141,10 @@ void init_rom_browser_menu(void) {
 				nb_roms++;
 			}
 		}
-		sprintf(filename, "%s/%s.gno", CF_STR(cf_get_item_by_name("rompath")), romlist[i]);
-		if (stat(filename, &filestat) == 0 && S_ISREG(filestat.st_mode)) {
+
+		sprintf(filename, "%s/%s.gno", p_rompath, romlist[i]);
+		if (stat(filename, &filestat) == 0 && S_ISREG(filestat.st_mode)) 
+		{
 			char *gnoname = dr_gno_romname(filename);
 			if (gnoname != NULL) {
 				rbrowser_menu->item = list_insert_sort(rbrowser_menu->item,
@@ -1157,6 +1164,8 @@ void init_rom_browser_menu(void) {
 				(void*) gn_menu_create_item("No Games Found...", MENU_ACTION, NULL, NULL));
 		rbrowser_menu->nb_elem++;
 	}
+
+	free(filename);
 }
 static volatile int scaning = 0;
 
@@ -1268,7 +1277,9 @@ static int change_effect_action(GN_MENU_ITEM *self, void *param) {
 	if (strcmp(ename, "none") != 0 || strcmp(ename, "soft") != 0) {
 		scale = 1;
 	}
-	strncpy(CF_STR(cf_get_item_by_name("effect")), ename, 254);
+
+
+	cf_set_string_by_name("effect", ename);
 	cf_item_has_been_changed(cf_get_item_by_name("effect"));
 	screen_reinit();
 	return MENU_STAY;
@@ -1295,7 +1306,7 @@ static int change_effect(GN_MENU_ITEM *self, void *param) {
 	while (1) {
 		effect_menu->draw(effect_menu); //frame_skip(0);printf("fps: %s\n",fps_str);
 		if ((a = effect_menu->event_handling(effect_menu)) > 0) {
-			self->str = CF_STR(cf_get_item_by_name("effect"));
+			self->str = cf_get_string_by_name("effect");
 			return MENU_STAY;
 		}
 	}
@@ -1416,7 +1427,7 @@ static void reset_menu_option(void) {
 	RESET_BOOL("16/9","wide");
 #endif
 	gitem=gn_menu_get_item_by_name(option_menu,"Effect");
-	gitem->str = CF_STR(cf_get_item_by_name("effect"));
+	gitem->str = cf_get_string_by_name("effect");
 
 	gitem=gn_menu_get_item_by_name(option_menu,"Sample Rate");
 	if (conf.sound)
@@ -1502,7 +1513,7 @@ void gn_init_menu(void) {
 	option_menu->nb_elem++;
 
 	gitem = gn_menu_create_item("Effect", MENU_LIST, change_effect, NULL);
-	gitem->str = CF_STR(cf_get_item_by_name("effect"));
+	gitem->str = cf_get_string_by_name("effect");
 	option_menu->item = list_append(option_menu->item, (void*) gitem);
 	option_menu->nb_elem++;
 

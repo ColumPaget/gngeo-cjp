@@ -4,22 +4,22 @@ AM_CPPFLAGS = -DDATA_DIRECTORY=\"$(pkgdatadir)\"
 SUBDIRS = effect blitter ym2610 $(m68k_subdir) $(z80_subdir) $(gui_subdir)
 
 bin_PROGRAMS = gngeo
-gngeo_SOURCES = fileio.c         pd4990a.c        gngeo_icon.h              \
-		sound.h          video.c          fileio.h          profiler.c      \
-		main.c           pd4990a.h        video.h           list.c          \
-		memory.c         profiler.h                list.h          \
-		blitter.h        font.h           memory.h          resfile.c       \
-		timer.c          effect.h         frame_skip.c      messages.c      \
-		screen.c         timer.h          emu.c             frame_skip.h    \
-		messages.h       screen.h         unzip.h           emu.h           \
-		neocrypt.c       sound.c          unzip.c           resfile.h       \
-		debug.c          debug.h          neocrypt.h	    state.c         \
-		state.h          video_template.h conf.c            conf.h          \
-		transpack.h      transpack.c              \
-		menu.c           menu.h           \
-			         roms.h           roms.c            mame_layer.h    \
-		mame_layer.c     neoboot.c        event.h           event.c         \
-		stb_image.c      stb_image.h      stb_zlib.c		stb_zlib.h      
+gngeo_SOURCES = utility_functions.c utility_functions.h       \
+	fileio.c         pd4990a.c        gngeo_icon.h              \
+	sound.h          fileio.h          profiler.c               \
+	main.c           pd4990a.h        video.c           video.h         \
+	memory.c         profiler.h       list.c            list.h          \
+	blitter.h        font.h           memory.h          resfile.c       \
+	timer.c          effect.h         frame_skip.c      messages.c      \
+	screen.c         timer.h          emu.c             frame_skip.h    \
+	messages.h       screen.h         unzip.h           emu.h           \
+	neocrypt.c       sound.c          unzip.c           resfile.h       \
+	debug.c          debug.h          neocrypt.h        state.c         \
+	state.h          video_template.h conf.c            conf.h          \
+	transpack.h      transpack.c      menu.c            menu.h          \
+	roms.h           roms.c         	\
+	mame_layer.h     mame_layer.c     neoboot.c         event.h   event.c \
+  stb_image.c      stb_image.h      stb_zlib.c		stb_zlib.h      
 
 # Platform dependant source and lib
 if USE_STARSCREAM

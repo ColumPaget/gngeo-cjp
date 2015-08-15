@@ -491,8 +491,8 @@ void gp2x_set_cpu_speed(void) {
 void gp2x_quit(void) {
 	//hackpgtable(1);
 	int i;
-	char *frontend=strdup(CF_STR(cf_get_item_by_name("frontend")));
-	char *fullpath=CF_STR(cf_get_item_by_name("frontend"));
+	char *frontend=strdup(cf_get_string_by_name("frontend"));
+	char *fullpath=cf_get_string_by_name("frontend");
 /*
 	for(i=0;i<gcache.total_bank;i++) {
 		printf("BANK %06d %d\n",i,mem_bank_usage[i]);

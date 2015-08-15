@@ -10,6 +10,20 @@
 #include "conf.h"
 #include "emu.h"
 #include "memory.h"
+#include "frame_skip.h"
+#include "messages.h"
+
+extern int slow_motion;
+int show_keysym=0;
+
+void output_keysym(int keysym)
+{
+char buf[256];
+
+snprintf(buf,255, "keysym: %d", keysym);
+draw_message(buf);
+}
+
 
 static int get_mapid(char *butid) {
 	printf("Get mapid %s\n",butid);
@@ -139,8 +153,8 @@ bool init_event(void) {
 			jmap->jhat[i]=calloc(SDL_JoystickNumHats(conf.joy[i]),sizeof(struct BUT_MAP));
 		}
 	}
-	create_joymap_from_string(1,CF_STR(cf_get_item_by_name("p1control")));
-	create_joymap_from_string(2,CF_STR(cf_get_item_by_name("p2control")));
+	create_joymap_from_string(1,cf_get_string_by_name("p1control"));
+	create_joymap_from_string(2,cf_get_string_by_name("p2control"));
 	return true;
 }
 #ifdef GP2X
@@ -183,29 +197,65 @@ int handle_pdep_event(SDL_Event *event) {
 	}
 }
 #else /* Default */
-int handle_pdep_event(SDL_Event *event) {
-	switch (event->type) {
-	case SDL_KEYDOWN:
-		switch (event->key.keysym.sym) {
-		case SDLK_ESCAPE:
-			return 1;
+int handle_pdep_event(SDL_Event *event) 
+{
+if (event->type == SDL_KEYDOWN)
+{
+		//Keys that mean something to the emulator
+		switch (event->key.keysym.sym) 
+		{
+			case SDLK_ESCAPE:
+			return EV_MENU;
 			break;
-		case SDLK_F12:
-		    screen_fullscreen();
-		    break;
-		default:
+
+			case SDLK_F1:
+			return EV_RESET_EMU;
+			break;
+
+			case SDLK_F2:
+			return EV_SCREENSHOT;
+			break;
+
+			case SDLK_F3:
+			return EV_TEST_SWITCH;
+			break;
+
+			case SDLK_F12:
+			return EV_FULLSCREEN;
+		  break;
+
+     	case SDLK_F4:
+				//we handle this here, because this .c file is where the keysyms come in
+			  show_keysym = 1 - show_keysym;
+        if (show_keysym) draw_message("Show keysym code : ON");
+        else draw_message("Show keysym code : OFF");
+			return EV_SHOW_KEYSYM;
+     	break;
+ 
+			case SDLK_F5:
+			return EV_SHOW_FPS;
+			break;
+
+     	case SDLK_F6:
+			return EV_SLOW_MOTION;
+			break;
+
+			case SDLK_F10:
+			return EV_AUTOFRAMESKIP; 
+			break;
+
+			case SDLK_F11:
+			return EV_SLEEPIDLE;
+			break;
+
+			default:
 			break;
 		}
-		break;
-		default:
-			break;
-	}
-	return 0;
+}
+return 0;
 }
 #endif
 
-#define EVGAME 1
-#define EVMENU 2
 
 int handle_event(void) {
 	SDL_Event event;
@@ -238,6 +288,8 @@ int handle_event(void) {
 		break;
 	    case SDL_KEYDOWN:
 				//printf("%d\n", event.key.keysym.sym);
+				if (show_keysym) output_keysym(event.key.keysym.sym);
+
 		    switch (jmap->key[event.key.keysym.sym].player) {
 			case 1:
 				joy_state[0][jmap->key[event.key.keysym.sym].map]=1;
@@ -436,11 +488,7 @@ int handle_event(void) {
 
 }
 
-/*
-int handle_event(void) {
-	return handle_event_inter(EVGAME);
-}
-*/
+
 static int last=-1;
 static int counter=40;
 

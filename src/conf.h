@@ -37,7 +37,7 @@ typedef struct CONF_ITEM {
 			int default_bool;
 		}dt_bool;
 		struct {
-			char str[255];
+			char *str;
 			char *default_str;
 		}dt_str;
 		struct {
@@ -53,6 +53,10 @@ typedef struct CONF_ITEM {
 	}data;
 }CONF_ITEM;
 
+
+//I wouldn't normally use '?' operator, I'd use if/then instead but I'm not sure that
+//if then wouldn't cause problems being substituted for these strings.
+//basically the ? operator is being used to check if 't' is non-null, and return 
 #define CF_BOOL(t) t->data.dt_bool.boolean
 #define CF_VAL(t) t->data.dt_int.val
 #define CF_STR(t) t->data.dt_str.str
@@ -74,9 +78,13 @@ bool cf_save_file(char *filename,int flags);
 bool cf_open_file(char *filename);
 void cf_init_cmd_line(void);
 int cf_get_non_opt_index(int argc, char *argv[]);
-char* cf_parse_cmd_line(int argc, char *argv[]);
+int cf_parse_cmd_line(int argc, char *argv[], char **romname);
 void cf_print_help(void);
 void cf_reset_to_default(void);
 void cf_item_has_been_changed(CONF_ITEM * item);
+
+char *cf_get_string_by_name(const char *name); 
+void cf_set_string_by_name(const char *name, char *value); 
+
 
 #endif

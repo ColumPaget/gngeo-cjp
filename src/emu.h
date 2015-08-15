@@ -29,6 +29,7 @@
 #include "SDL_types.h"
 #define Uintptr long
 
+#define MAX_MESSAGE_LEN 128
 
 typedef enum SYSTEM {
     SYS_ARCADE=0,
@@ -74,7 +75,7 @@ struct {
     Uint8 sleep_idle;
     Uint8 screen320;
 
-    char message[128];
+    char message[MAX_MESSAGE_LEN];
     char fps[4];
 
     int *p1_key;
@@ -127,6 +128,7 @@ Uint8 key[SDLK_LAST];
 Uint8 *joy_button[2];
 Sint32 *joy_axe[2];
 Uint32 joy_numaxes[2];
+static int slow_motion;
 
 void debug_loop(void);
 void main_loop(void);

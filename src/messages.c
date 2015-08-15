@@ -99,7 +99,7 @@ void draw_message(const char *string)
        del_timer(msg_timer);
        msg_timer=NULL;
      */
-    strcpy(conf.message, string);
+    strncpy(conf.message, string, MAX_MESSAGE_LEN);
     conf.do_message = 75;
     //msg_timer=insert_timer(1.0,0,stop_message);
 }

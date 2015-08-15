@@ -206,8 +206,8 @@ SDL_bool screen_init() {
 		neffect = conf.neffect;
 	 */
 	interpolation = CF_BOOL(cf_interpol);
-	nblitter = get_blitter_by_name(CF_STR(cf_blitter));
-	neffect = get_effect_by_name(CF_STR(cf_effect));
+	nblitter = get_blitter_by_name(cf_get_string_by_name("blitter"));
+	neffect = get_effect_by_name(cf_get_string_by_name("effect"));
 	fullscreen = CF_BOOL(cf_fs);
 	conf.res_x = 304;
 	conf.res_y = 224;
@@ -221,6 +221,7 @@ SDL_bool screen_init() {
 	if ((*blitter[nblitter].init) () == SDL_FALSE)
 		return SDL_FALSE;
 
+printf("Init Effect %d [%s]\n",neffect,cf_get_string_by_name("effect"));
 	/* Init of effect */
 	//if (neffect > 0)
 	if ((*effect[neffect].init) () == SDL_FALSE)
@@ -248,12 +249,11 @@ SDL_bool effect_smooth_init(void) {
 	return SDL_TRUE;
 }
 #endif
+
+
+
 void screen_change_blitter_and_effect(void) {
 	CONF_ITEM *cf_blitter, *cf_effect;
-/*
-			if (bname == NULL) bname = CF_STR(cf_get_item_by_name("blitter"));
-			if (ename == NULL) ename = CF_STR(cf_get_item_by_name("effect"));
-	 */
 
 	cf_blitter = cf_get_item_by_name("blitter");
 	cf_effect = cf_get_item_by_name("effect");
@@ -262,26 +262,21 @@ void screen_change_blitter_and_effect(void) {
 
 	nblitter = get_blitter_by_name(CF_STR(cf_blitter));
 	neffect = get_effect_by_name(CF_STR(cf_effect));
-//	printf("set %s %s \n", bname, ename);
 
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
 	if ((*blitter[nblitter].init) () == SDL_FALSE) {
-		nblitter = 0;
-		sprintf(CF_STR(cf_get_item_by_name("blitter")), "soft");
+		cf_set_string_by_name("blitter", "soft");
 		printf("revert to soft\n");
 		if ((*blitter[nblitter].init) () == SDL_FALSE)
 			exit(-1);
-	} /*else
-		snprintf(CF_STR(cf_get_item_by_name("blitter")), 255, "%s", bname);
-*/
+	}
+ 
 	if ((*effect[neffect].init) () == SDL_FALSE) {
 		printf("revert to none\n");
-		neffect = 0;
-		sprintf(CF_STR(cf_get_item_by_name("effect")), "none");
-	} /*else
-		snprintf(CF_STR(cf_get_item_by_name("effect")), 255, "%s", ename);
-*/
+		cf_set_string_by_name("effect", "none");
+	}
+ 
 	SDL_InitSubSystem(SDL_INIT_VIDEO);
 
 
@@ -329,7 +324,7 @@ SDL_bool screen_reinit(void) {
 		scale = 1;
 	else
 		scale = CF_VAL(cf_get_item_by_name("scale"));
-printf("AA Blitter %s effect %s\n",CF_STR(cf_get_item_by_name("blitter")),CF_STR(cf_get_item_by_name("effect")));
+printf("AA Blitter %s effect %s\n",cf_get_string_by_name("blitter"),cf_get_string_by_name("effect"));
 	screen_change_blitter_and_effect();
 
 	return SDL_TRUE;
