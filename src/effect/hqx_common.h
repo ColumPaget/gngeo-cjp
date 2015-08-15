@@ -29,5 +29,5 @@ extern Uint32   RGBtoYUV[65536];
 extern SDL_Surface *tmps;
 extern SDL_Rect tmps_rect;
 
-int InitLUTs(void);
+void InitLUTs(void);
 

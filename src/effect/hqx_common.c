@@ -32,7 +32,7 @@ Uint32   RGBtoYUV[65536];
 SDL_Surface *tmps;
 SDL_Rect tmps_rect =	{ 0,  0, 304, 224};
 
-int InitLUTs(void)
+void InitLUTs(void)
 {
   int i, j, k, r, g, b, Y, u, v;
 
