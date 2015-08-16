@@ -1,7 +1,19 @@
+gngeo-cjp: This is Colum Paget's fork of gngeo 0.8. Most of the function 
+keys work again, and a segfault that occurs when loading a saved game has 
+been fixed (along with some others). You can now specify a path to a config
+file on the command-line. The default font has been make proportional to
+maximise screen real estate, and the user can now specify messages that
+appear on the screen (the aim of this is to put a summary of moves onscreen
+though there's only room for a few. You can also have date/time and hostname
+through the use of % format strings.
+
+
+
+
 GNGEO : A NeoGeo emulator for linux (and maybe some other unix)
 
 Licence:
-	Gngeo is build arround many different block with various licence.
+	Gngeo is built around many different block with various licence.
 	The original code is released under the GPLV2 with this special exeption:
 	
 		As a special exception, You have
@@ -18,8 +30,8 @@ Licence:
 
 	Gngeo could not exist without the Mame project, and some code come
 	directly from it (the ym2610 for example). As you may know, the Mame
-	licence forbid commercial use, and as a conscequence, commercial use
-	of gngeo (as a whole) is also forbided. This is the same with Cyclone,
+	licence forbid commercial use, and as a consequence, commercial use
+	of gngeo (as a whole) is also forbiden. This is the same with Cyclone,
 	Drz80, Raze and Starscream.	  
 
 REQUIREMENT : 
@@ -65,6 +77,7 @@ Emulate the NeoGeo rom designed by ROMSET
       --bench                Draw x frames, then quit and show average fps
   -B, --biospath=PATH        Tell gngeo where your neogeo bios is
   -b, --blitter=Blitter      Use the specified blitter (help for a list)
+  -c, --config=PATH          Path to config file
       --country=...          Set the contry to japan, asia, usa or europe
   -D, --debug                Start with inline debuger
   -e, --effect=Effetc        Use the specified effect (help for a list)
@@ -77,6 +90,9 @@ Emulate the NeoGeo rom designed by ROMSET
       --joystick             Enable joystick support
   -l, --listgame             Show all the game available in the romrc
       --libglpath=PATH       Path to your libGL.so
+      --msg1=...             Onscreen message 1. format: x:y:msg
+      --msg2=...             Onscreen message 2. format: x:y:msg
+      --msg3=...             Onscreen message 3. format: x:y:msg
   -P, --pal                  Use PAL timing (buggy)
       --p1control=...        Player1 control configutation
       --p2control=...        Player2 control configutation
@@ -103,6 +119,32 @@ Emulate the NeoGeo rom designed by ROMSET
 
 All boolean options can be disabled with --no-OPTION
 (Ex: --no-sound turn sound off)
+
+the msg1, msg2 and msg3 options allow the specification of up to three messages
+to be displayed on the screen. This has the format:
+
+x-pos:y-pos:msg
+
+where x-pos and y-pos are numeric x and y positions for the message. Negative values
+of x-pos and y-pos will result in the message being positioned relative to the maximum
+x or y position (so back from the right edge or up from the bottom).
+
+msg is the message itself. This can contain the string '\n' to represent a newline, or
+format strings in the form:
+
+%h - hostname
+%H - hour
+%M - minute
+%S - seconds
+%d - day
+%m - month
+%y - 2-digit year
+%Y - 4-digit year
+
+more format strings will likely be added when I can decide on what's useful.
+
+This feature is intended to allow a 'crib' of moves to be displayed onscreen, esp. for
+fighting games that tend to have a lot of 'hcf-a,d,d,d' special moves. 
 
 
 CONFIGURATION :
