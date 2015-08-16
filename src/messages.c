@@ -33,6 +33,8 @@
 #include "conf.h"
 #include "utility_functions.h"
 #include <stdarg.h>
+#include <time.h>
+#include <unistd.h>
 
 #define MAX_MESSAGE_LEN 128
 
@@ -44,8 +46,7 @@ int SDL_putchar(SDL_Surface * dest, int x, int y, unsigned char c)
     static SDL_Rect font_rect, dest_rect;
     int indice = c - 32;
 
-    if (c < 32 || c > 127)
-	return;
+    if (c < 32 || c > 127) return(0);
 
     font_rect.x = indice *  font_w;
     font_rect.y = 0;
@@ -194,26 +195,166 @@ void text_input(const char *message,int x,int y,char *string,int size)
 
 
 
-//this puts a message into a slot (there's 4 slots for messages)
-//the actual drawing of the message on the screen is done through 'output_messages' (below)
-//which calls SDL_textout (above, near top)
-void draw_message(int slot, int x, int y, const char *string, int duration)
+char *msg_add_char(char *RetStr, char c, int *len, int *space)
 {
-	TMessage *m;
+	(*len)++;
+	if (*len > *space)
+	{
+		(*space)+=100;
+		RetStr=realloc(RetStr, (*space)+1);
+	}
+	RetStr[*len]=c;
 
-		//Only 4 slots for messages!
-		if ((slot < 0) || (slot > 4)) return;
-		m=conf.Messages+slot;
-		m->len=strlen(string);
-		m->string=rstrcpy(m->string, string, MAX_MESSAGE_LEN);
-    m->duration = duration;
-		m->x=x;
-		m->y=y;
-	printf("dm: %d [%s] [%s]\n",m->duration,string,m->string);
+return(RetStr);
+}
+
+char *msg_add_str(char *RetStr, const char *Str, int *len, int *space)
+{
+int slen;
+
+(*len)++; //go beyond current char
+slen=sstrlen(Str);
+if (((*len) + slen) > *space)
+{
+	(*space)+=slen;
+	RetStr=realloc(RetStr, (*space)+1);
+}
+strncpy(RetStr + *len, Str, slen);
+(*len)+=slen-1; //we have to -1 because we already added a char when we did (*len)++;
+
+return(RetStr);
 }
 
 
+char *format_message(char *RetStr, const char *MsgStr)
+{
+const char *ptr;
+char *dptr, *Tempstr=NULL;
+int len=-1, space=100, val;
+struct tm *Time=NULL;
+time_t secs;
 
+printf("Fmt mss: %s\n",MsgStr);
+
+RetStr=realloc(RetStr, space+1);
+
+for (ptr=MsgStr; *ptr !='\0'; ptr++)
+{
+	if (*ptr=='%')
+	{
+		ptr++;
+		switch (*ptr)
+		{
+			case '%':
+				RetStr=msg_add_char(RetStr, '%', &len, &space);
+			break;
+
+			case 'h':
+				Tempstr=(char *)realloc(Tempstr,1025);
+				//never trust gethostbyname to have null terminated!
+				memset(Tempstr,0,1025);
+				val=gethostname(Tempstr, 1024);
+				if (val > -1) RetStr=msg_add_str(RetStr, Tempstr, &len, &space);
+			break;
+
+			case 'H':
+				if (! Time)
+				{
+					time(&secs);
+					Time=localtime(&secs);
+				}
+				Tempstr=(char *)realloc(Tempstr,1025);
+				snprintf(Tempstr,1024,"%02d",Time->tm_hour);
+				RetStr=msg_add_str(RetStr, Tempstr, &len, &space);
+			break;
+
+			case 'M':
+				if (! Time)
+				{
+					time(&secs);
+					Time=localtime(&secs);
+				}
+				Tempstr=(char *)realloc(Tempstr,1025);
+				snprintf(Tempstr,1024,"%02d",Time->tm_min);
+				RetStr=msg_add_str(RetStr, Tempstr, &len, &space);
+			break;
+
+			case 'S':
+				if (! Time)
+				{
+					time(&secs);
+					Time=localtime(&secs);
+				}
+				Tempstr=(char *)realloc(Tempstr,1025);
+				snprintf(Tempstr,1024,"%02d",Time->tm_sec);
+				RetStr=msg_add_str(RetStr, Tempstr, &len, &space);
+			break;
+
+			case 'd':
+				if (! Time)
+				{
+					time(&secs);
+					Time=localtime(&secs);
+				}
+				Tempstr=(char *)realloc(Tempstr,1025);
+				snprintf(Tempstr,1024,"%02d",Time->tm_mday);
+				RetStr=msg_add_str(RetStr, Tempstr, &len, &space);
+			break;
+
+			case 'm':
+				if (! Time)
+				{
+					time(&secs);
+					Time=localtime(&secs);
+				}
+				Tempstr=(char *)realloc(Tempstr,1025);
+				snprintf(Tempstr,1024,"%02d",Time->tm_mon+1);
+				RetStr=msg_add_str(RetStr, Tempstr, &len, &space);
+			break;
+
+			case 'y':
+				if (! Time)
+				{
+					time(&secs);
+					Time=localtime(&secs);
+				}
+				Tempstr=(char *)realloc(Tempstr,1025);
+				snprintf(Tempstr,1024,"%04d",Time->tm_year+1900);
+				RetStr=msg_add_str(RetStr, Tempstr+2, &len, &space);
+			break;
+
+			case 'Y':
+				if (! Time)
+				{
+					time(&secs);
+					Time=localtime(&secs);
+				}
+				Tempstr=(char *)realloc(Tempstr,1025);
+				snprintf(Tempstr,1024,"%04d",Time->tm_year+1900);
+				RetStr=msg_add_str(RetStr, Tempstr, &len, &space);
+			break;
+
+
+		}
+	}
+	else if (*ptr=='\\')
+	{
+		ptr++;
+		if (*ptr=='n') RetStr=msg_add_char(RetStr, '\n', &len, &space);
+		else RetStr=msg_add_char(RetStr, *ptr, &len, &space);
+	}
+	else RetStr=msg_add_char(RetStr, *ptr, &len, &space);
+}
+
+RetStr[len+1]='\0';
+
+if (Tempstr) free(Tempstr);
+
+return(RetStr);
+}
+
+
+//this actually calls the functions taht draw messages on the screen
 void output_messages(SDL_Surface *Surface)
 {
 TMessage *m;
@@ -224,8 +365,19 @@ for (i=0; i < 4; i++)
 	m=conf.Messages+i;
   if (m->duration) 
 	{
+		if (m->refresh)
+		{
+			m->refresh_count--;
+			if (m->refresh_count < 1)
+			{
+			m->string=format_message(m->string, m->msg_template);
+			m->refresh_count=m->refresh;
+			}
+		}
+
     SDL_textout(Surface, m->x, m->y, m->string,m->len);
-    m->duration--;
+		//duration of -1 is a peter-pan message: it never gets old
+    if (m->duration > -1) m->duration--;
 	}
 }
 
@@ -233,6 +385,29 @@ if (conf.show_fps) SDL_textout(buffer, 8, 0, fps_str, sstrlen(fps_str));
 }
 
 
+//this puts a message into a slot (there's 4 slots for messages)
+//the actual drawing of the message on the screen is done through 'output_messages' (below)
+//which calls SDL_textout (above, near top)
+void draw_message(int slot, int x, int y, const char *msg, int duration)
+{
+	TMessage *m;
+
+		//Only 4 slots for messages!
+		if ((slot < 0) || (slot > 4)) return;
+		m=conf.Messages+slot;
+		if (strchr(msg,'%')) m->refresh=60;
+		m->msg_template=rstrcpy(m->msg_template, msg, MAX_MESSAGE_LEN);
+		m->string=format_message(m->string, msg);
+		m->len=strlen(m->string);
+    m->duration = duration;
+		m->x=x;
+		m->y=y;
+	printf("dm: %d [%s] [%s]\n",m->duration,msg,m->string);
+}
+
+
+
+//this loads up user defined messages
 void init_messages()
 {
 char *buff=NULL, *ptr, *dptr;
@@ -253,21 +428,7 @@ int x, y, i;
 			y=strtol(ptr,&ptr,10);
 			if (*ptr==':') ptr++;
 			
-			buff=realloc(buff,sstrlen(ptr)+1);
-			dptr=buff;
-			for (; *ptr !='\0'; ptr++)
-			{
-				if (*ptr=='\\')
-				{
-					ptr++;
-					if (*ptr=='n') *dptr='\n';
-					else *dptr=*ptr;
-				}
-				else *dptr=*ptr;
-				dptr++;
-			}
-			*dptr='\0';
-      draw_message(i,x,y,buff,9999999);
+      draw_message(i,x,y,ptr,-1);
     }
 	}
 

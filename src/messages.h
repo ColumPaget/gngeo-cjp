@@ -34,6 +34,9 @@ int y;
 int len;
 int width;
 int duration;
+int refresh;
+int refresh_count;
+char *msg_template;
 char *string;
 }TMessage; 
 
