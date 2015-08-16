@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include "transpack.h"
-
+#include "utility_functions.h"
 
 static void trans_pack_add(Uint32 begin,Uint32 end,Uint32 type)
 {
@@ -66,49 +66,55 @@ void trans_pack_open(char *filename)
 {
     FILE *f;
     char buf[256];
-    char *res;
-    char range[32];
+    char *range=NULL, *ptr;
     int type, begin, end;
-    char *t;
 
     tile_trans = NULL;
-    if (strcmp(filename,"none")==0)
-	return;
+    if (strcmp(filename,"none")==0) return;
 
     f = fopen(filename, "r");
 
-    if (f == NULL) {
+	if (f == NULL) 
+	{
 	printf("Can't open %s\n", filename);
 	return;
-    }
-    while (!feof(f)) {
-	res=fgets(buf, 256, f);
-
-	t = strchr(buf, ';');
-	if (t)
-	    t[0] = 0;
-
-	t = strstr(buf, "Game");
-	if (t)
-	    continue;
-	t = strstr(buf, "Name");
-	if (t)
-	    continue;
-
-	if (sscanf(buf, " %s %d \n", range, &type) == 2) {
-	    t = strchr(range, '-');
-	    if (t) {
-		t[0] = 0;
-		t++;
-		sscanf(range, "%x", &begin);
-		sscanf(t, "%x", &end);
-	    } else {
-		sscanf(range, "%x", &begin);
-		end = begin;
-	    }
-	    //printf("%x %x %d\n",begin,end,type);
-	    trans_pack_add(begin, end, type);
 	}
-    }
-    fclose(f);
+
+  while (!feof(f)) 
+	{
+	fgets(buf, 256, f);
+
+	ptr = strchr(buf, ';');
+	if (ptr) *ptr='\0';
+
+	ptr = strstr(buf, "Game");
+	if (ptr) continue;
+	ptr = strstr(buf, "Name");
+	if (ptr) continue;
+
+	ptr=buf;
+	while (isspace(*ptr)) ptr++;
+	ptr=(char *) get_token(ptr," ",&range);
+	while (isspace(*ptr)) ptr++;
+	if (isdigit(*ptr))
+	{
+		type=strtol(ptr,NULL,10);
+
+		//strtol will stop at the first character that
+		//it can't convert, and return that in 'ptr'. So we
+		//can use it to handle hex values seperated by '-'
+		begin=strtol(ptr,&ptr,16);
+	  if (*ptr=='-') 
+		{
+				ptr++;
+				end=strtol(ptr,&ptr,16);
+	  } 
+		else end = begin;
+	   //printf("%x %x %d\n",begin,end,type);
+	   trans_pack_add(begin, end, type);
+	}
+	}
+	fclose(f);
+
+	if (range) free(range);
 }

@@ -8,5 +8,8 @@
 char *rstrcpy(char *Dest, const char *Src, int Max);
 int sstrlen(const char *String);
 
+
+const char *get_token(const char *In, const char *Delims, char **Token);
+
 #endif
 

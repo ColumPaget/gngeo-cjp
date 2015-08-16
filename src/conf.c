@@ -555,8 +555,7 @@ bool cf_save_file(char *filename, int flags) {
 	FILE *f_dst;
 	int i = 0, j, a;
 	char buf[512];
-	char name[32];
-	char val[255];
+	char *name=NULL, *ptr;
 	CONF_ITEM *cf;
 
 	if (!conf_file) {
@@ -594,9 +593,9 @@ bool cf_save_file(char *filename, int flags) {
 				continue;
 			}
 
-			//sscanf(buf, "%s %s", name, val);
-			sscanf(buf, "%s ", name);
-			strncpy(val, buf + strlen(name) + 1, 254);
+			//this is an odd approach, seeks to replace existing config
+			//items in the order they exist in config file?
+			ptr=get_token(buf, " ", &name);
 
 			cf = cf_get_item_by_name(name);
 			if (cf) {
@@ -677,6 +676,8 @@ bool cf_save_file(char *filename, int flags) {
 	remove(conf_file);
 	rename(conf_file_dst, conf_file);
 
+	if (name) free(name);
+
 	return true;
 }
 
@@ -717,8 +718,7 @@ bool cf_open_file(char *filename)
 	FILE *f;
 	int i = 0;
 	char buf[512];
-	char name[32];
-	char val[255];
+	char *name=NULL, *ptr;
 	CONF_ITEM *cf;
 
 	if (! sstrlen(conf_file)) 
@@ -750,35 +750,30 @@ printf("OPEN: %s\n",conf_file);
 		if (discard_line(buf))
 			continue;
 	
-		/* TODO: Verify this on Win32 */
-		sscanf(buf, "%s %s", name, val);
+		ptr=get_token(buf, " ", &name);
 
-		//sscanf(buf, "%s ", name);
-		//strncpy(val,buf+strlen(name)+1,254);
-
-		//printf("%s|%s|\n",name,val);
 		cf = cf_get_item_by_name(name);
 		if (cf && !(cf->flags & CF_SETBYCMD) && (!cf->modified)) {
 			printf("Option %s\n",cf->name);
 			switch (cf->type) {
 				case CFT_INT:
-					CF_VAL(cf) = atoi(val);
+					CF_VAL(cf) = atoi(ptr);
 					break;
 				case CFT_BOOLEAN:
-					CF_BOOL(cf) = (strcasecmp(val, "true") == 0 ? true : false);
+					CF_BOOL(cf) = (strcasecmp(ptr, "true") == 0 ? true : false);
 					break;
 				case CFT_STRING:
-					CF_STR(cf)=rstrcpy(CF_STR(cf), val, 254);
+					CF_STR(cf)=rstrcpy(CF_STR(cf), ptr, 1024);
 					break;
 				case CFT_ARRAY:
-					read_array(CF_ARRAY(cf), val, CF_ARRAY_SIZE(cf));
+					read_array(CF_ARRAY(cf), ptr, CF_ARRAY_SIZE(cf));
 					break;
 				case CFT_ACTION:
 				case CFT_ACTION_ARG:
 					/* action are not available in the conf file */
 					break;
 				case CFT_STR_ARRAY:
-					CF_STR_ARRAY(cf) = read_str_array(val, &CF_STR_ARRAY_SIZE(cf));
+					CF_STR_ARRAY(cf) = read_str_array(ptr, &CF_STR_ARRAY_SIZE(cf));
 					break;
 			}
 		} else {
@@ -787,6 +782,7 @@ printf("OPEN: %s\n",conf_file);
 		}
 	}
 
+	if (name) free(name);
 	cf_cache_conf();
 	return true;
 }
