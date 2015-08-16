@@ -21,7 +21,7 @@ void output_keysym(int keysym)
 char buf[256];
 
 snprintf(buf,255, "keysym: %d", keysym);
-draw_message(buf);
+draw_message(MSGSLOT_SYSTEM,0,-1,buf,75);
 }
 
 
@@ -172,7 +172,7 @@ int handle_pdep_event(SDL_Event *event) {
 				for (i=0;i<snd_volume/5;i++) volbuf[i]='|';
 				for (i=snd_volume/5;i<20;i++) volbuf[i]='-';
 				volbuf[20]=0;
-				draw_message(volbuf);
+				draw_message(MSGSLOT_SYSTEM,0,-1,volbuf,75);
 			}
 			if (event->jbutton.button==GP2X_VOL_DOWN && conf.sound) {
 				if (snd_volume>0) snd_volume-=5; else snd_volume=0;
@@ -180,7 +180,7 @@ int handle_pdep_event(SDL_Event *event) {
 				for (i=0;i<snd_volume/5;i++) volbuf[i]='|';
 				for (i=snd_volume/5;i<20;i++) volbuf[i]='-';
 				volbuf[20]=0;
-				draw_message(volbuf);
+				draw_message(MSGSLOT_SYSTEM,0,-1,volbuf,75);
 			}
 		}
 		break;
@@ -227,8 +227,8 @@ if (event->type == SDL_KEYDOWN)
      	case SDLK_F4:
 				//we handle this here, because this .c file is where the keysyms come in
 			  show_keysym = 1 - show_keysym;
-        if (show_keysym) draw_message("Show keysym code : ON");
-        else draw_message("Show keysym code : OFF");
+        if (show_keysym) draw_message(MSGSLOT_SYSTEM,0,-1,"Show keysym code : ON",75);
+        else draw_message(MSGSLOT_SYSTEM,0,-1,"Show keysym code : OFF",75);
 			return EV_SHOW_KEYSYM;
      	break;
  

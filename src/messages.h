@@ -21,9 +21,27 @@
 
 #include <SDL.h>
 
-void draw_message(const char *string);
+
+#define MSGSLOT_SYSTEM 0
+#define MSGSLOT_USR1   1
+#define MSGSLOT_USR2   2
+#define MSGSLOT_USR3   3
+
+typedef struct
+{
+int x;
+int y;
+int len;
+int width;
+int duration;
+char *string;
+}TMessage; 
+
+void init_messages();
+void output_messages(SDL_Surface *Surface);
+void draw_message(int slot, int x, int y, const char *string, int duration);
 void stop_message(int param);
-void SDL_textout(SDL_Surface * dest, int x, int y, const char *string);
+void SDL_textout(SDL_Surface * dest, int x, int y, const char *string, int len);
 void text_input(const char *message,int x,int y,char *string,int size);
 void error_box(char *fmt,...);
 

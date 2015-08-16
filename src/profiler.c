@@ -48,7 +48,7 @@ void profiler_show_stat(void)
 
 
     //if (count > 1) {
-	draw_message(buffer);
+	draw_message(MSGSLOT_SYSTEM,0,-1,buffer,75);
 /*
 	count = 0;
     } else

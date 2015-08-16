@@ -674,7 +674,6 @@ int gn_popup_question(const char *name, const char *fmt, ...) {
 		SDL_BlitSurface(menu_buf, NULL, buffer, NULL);
 		screen_update();
 
-			//effect_menu->draw(effect_menu); //frame_skip(0);printf("fps: %s\n",fps_str);
 		if ((a = yesno_menu->event_handling(yesno_menu)) >= 0) {
 			printf("return %d\n",a);
 			return a;
@@ -1203,7 +1202,7 @@ int rom_browser_menu(void) {
 	}
 
 	while (1) {
-		rbrowser_menu->draw(rbrowser_menu); //frame_skip(0);printf("fps: %s\n",fps_str);
+		rbrowser_menu->draw(rbrowser_menu); 
 		if ((a = rbrowser_menu->event_handling(rbrowser_menu)) > 0) {
 			if (a == MENU_CLOSE)
 				return MENU_STAY;
@@ -1305,7 +1304,7 @@ static int change_effect(GN_MENU_ITEM *self, void *param) {
 		}
 	}
 	while (1) {
-		effect_menu->draw(effect_menu); //frame_skip(0);printf("fps: %s\n",fps_str);
+		effect_menu->draw(effect_menu);
 		if ((a = effect_menu->event_handling(effect_menu)) > 0) {
 			self->str = cf_get_string_by_name("effect");
 			return MENU_STAY;
@@ -1379,7 +1378,7 @@ static int change_samplerate(GN_MENU_ITEM *self, void *param) {
 	//	gn_menu_disable_item(srate_menu,"No sound");
 
 	while (1) {
-		srate_menu->draw(srate_menu); //frame_skip(0);printf("fps: %s\n",fps_str);
+		srate_menu->draw(srate_menu); 
 		if ((a = srate_menu->event_handling(srate_menu)) > 0) {
 			if (conf.sound)
 				sprintf(self->str, "%d", conf.sample_rate);
@@ -1442,7 +1441,7 @@ static int option_action(GN_MENU_ITEM *self, void *param) {
 	int a;
 	reset_menu_option();
 	while (1) {
-		option_menu->draw(option_menu); //frame_skip(0);printf("fps: %s\n",fps_str);
+		option_menu->draw(option_menu); 
 		if ((a = option_menu->event_handling(option_menu)) > 0) {
 			reset_menu_option();
 			return MENU_STAY;
@@ -1573,12 +1572,10 @@ Uint32 run_menu(void) {
 	}
 
 	while (1) {
-		main_menu->draw(main_menu); //frame_skip(0);printf("fps: %s\n",fps_str);
+		main_menu->draw(main_menu); 
 		if ((a = main_menu->event_handling(main_menu)) > 0)
-			//reset_event();
 			return a;
 	}
-	//reset_event();
 	if (conf.game == NULL) return 2; /* Exit */
 	return 0;
 }

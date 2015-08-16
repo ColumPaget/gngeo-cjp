@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "ym2610/2610intf.h"
-#include "font.h"
+#include "fonts.h"
 #include "fileio.h"
 #include "video.h"
 #include "screen.h"
@@ -119,11 +119,11 @@ void init_sdl(void /*char *rom_name*/)
 		exit(-1);
 	}
 	
+	LoadMessageFont("");
 	buffer = SDL_CreateRGBSurface(surface_type, 352, 256, 16, 0xF800, 0x7E0, 0x1F, 0);
 	SDL_FillRect(buffer,NULL,SDL_MapRGB(buffer->format,0xE5,0xE5,0xE5));
 	
-	fontbuf = SDL_CreateRGBSurfaceFrom(font_image.pixel_data, font_image.width, font_image.height
-					       , 24, font_image.width * 3, 0xFF0000, 0xFF00, 0xFF, 0);
+	fontbuf = SDL_CreateRGBSurfaceFrom(MessageFont->pixel_data, MessageFont->width, MessageFont->height, 24, MessageFont->width * 3, 0xFF0000, 0xFF00, 0xFF, 0);
 	SDL_SetColorKey(fontbuf,SDL_SRCCOLORKEY,SDL_MapRGB(fontbuf->format,0xFF,0,0xFF));
 	fontbuf=SDL_DisplayFormat(fontbuf);
 	icon = SDL_CreateRGBSurfaceFrom(gngeo_icon.pixel_data, gngeo_icon.width,
@@ -149,7 +149,7 @@ static void catch_me(int signo) {
 }
 int main(int argc, char *argv[])
 {
-    char *rom_name=NULL;
+    char *rom_name=NULL, *ptr;
 
 
 
@@ -171,13 +171,9 @@ int main(int argc, char *argv[])
     cf_init_cmd_line();
 
 		cf_parse_cmd_line(argc,argv, &rom_name);
-printf("PC:: %s\n",cf_get_string_by_name("config"));
     cf_open_file(cf_get_string_by_name("config")); /* Open Default configuration file */
-printf("EF:: %s\n",cf_get_string_by_name("effect"));
 		//cf_parse_cmd_line(argc,argv, &rom_name);
-printf("EF2:: %s\n",cf_get_string_by_name("effect"));
-
-//printf("rom_name: %s\n",rom_name);
+		//printf("rom_name: %s\n",rom_name);
 
     /* print effect/blitter list if asked by user */
     if (! strcmp(cf_get_string_by_name("effect"),"help"))
@@ -186,12 +182,13 @@ printf("EF2:: %s\n",cf_get_string_by_name("effect"));
 			exit(0);
     }
 
-if (!strcmp(cf_get_string_by_name("blitter"),"help"));
-{
-	print_blitter_list();
-	//exit(0);
-}
+		if (!strcmp(cf_get_string_by_name("blitter"),"help"));
+		{
+			print_blitter_list();
+			//exit(0);
+		}
 
+	init_messages();
 	init_sdl();
 
 /* GP2X stuff */

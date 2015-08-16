@@ -664,13 +664,11 @@ void gp2x_init(void) {
 
 
     sdl_set_title(NULL);
-    //SDL_textout(screen, 1, 231, "Patching MMU ... ");SDL_Flip(screen);
-
     //   if (hackpgtable()==0) {
     if (hack_the_mmu()==0) {
-	    SDL_textout(screen, 1, 231, "Patching MMU ... OK!");SDL_Flip(screen);
+	    SDL_textout(screen, 1, 231, "Patching MMU ... OK!",20);SDL_Flip(screen);
     } else {
-	    SDL_textout(screen, 1, 231, "Patching MMU ... FAILED :(");SDL_Flip(screen);
+	    SDL_textout(screen, 1, 231, "Patching MMU ... FAILED :(",26);SDL_Flip(screen);
 	    SDL_Delay(300);
     }
 #ifdef ENABLE_940T

@@ -9,7 +9,7 @@ gngeo_SOURCES = utility_functions.c utility_functions.h       \
 	sound.h          fileio.h          profiler.c               \
 	main.c           pd4990a.h        video.c           video.h         \
 	memory.c         profiler.h       list.c            list.h          \
-	blitter.h        font.h           memory.h          resfile.c       \
+	blitter.h        fonts.h   fonts.c  memory.h          resfile.c       \
 	timer.c          effect.h         frame_skip.c      messages.c      \
 	screen.c         timer.h          emu.c             frame_skip.h    \
 	messages.h       screen.h         unzip.h           emu.h           \

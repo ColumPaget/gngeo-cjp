@@ -368,20 +368,20 @@ void main_loop(void) {
 			break;
 
 			case EV_TEST_SWITCH:
-					draw_message("Test Switch ON");
+					draw_message(MSGSLOT_SYSTEM,0,-1,"Test Switch ON",75);
 					conf.test_switch = 1;
 					break;
 			break;
 
 			case EV_RESET_EMU:
-					draw_message("Reset");
+					draw_message(MSGSLOT_SYSTEM,0,-1,"Reset",75);
 					//neogeo_init();
 					cpu_68k_reset();
 					break;
 
 			case EV_SCREENSHOT:
 					take_screenshot();
-					draw_message("Screenshot saved");
+					draw_message(MSGSLOT_SYSTEM,0,-1,"Screenshot saved",75);
 					break;
 
 			case EV_SHOW_FPS:
@@ -395,9 +395,9 @@ void main_loop(void) {
 			case EV_SLOW_MOTION:
 					slow_motion = 1 - slow_motion;
 					if (slow_motion)
-					draw_message("SlowMotion : ON");
+					draw_message(MSGSLOT_SYSTEM,0,-1,"SlowMotion : ON",85);
 					else {
-						draw_message("SlowMotion : OFF");
+						draw_message(MSGSLOT_SYSTEM,0,-1,"SlowMotion : OFF",75);
 						reset_frame_skip();
 					}
 				break;
@@ -406,26 +406,25 @@ void main_loop(void) {
 					conf. autoframeskip ^= SDL_TRUE;
 					if (conf.autoframeskip) {
 						reset_frame_skip();
-						draw_message("AutoFrameSkip : ON");
+						draw_message(MSGSLOT_SYSTEM,0,-1,"AutoFrameSkip : ON",75);
 					} else
-					draw_message("AutoFrameSkip : OFF");
+					draw_message(MSGSLOT_SYSTEM,0,-1,"AutoFrameSkip : OFF",75);
 					break;
 
 					case EV_SLEEPIDLE:
 					conf.sleep_idle ^= SDL_TRUE;
 					if (conf.sleep_idle)
-					draw_message("Sleep idle : ON");
+					draw_message(MSGSLOT_SYSTEM,0,-1,"Sleep idle : ON",75);
 					else
-					draw_message("Sleep idle : OFF");
+					draw_message(MSGSLOT_SYSTEM,0,-1,"Sleep idle : OFF",75);
 					break;
 
 					case EV_FULLSCREEN:
 					screen_fullscreen();
 					break;
 
-
-/*
-					case SDLK_F7:
+					/*
+					case EV_SCANLINE:
 					//screen_set_effect("scanline");
 					if (conf.debug) {
 						dbg_step = 1;

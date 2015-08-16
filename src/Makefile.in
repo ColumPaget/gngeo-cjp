@@ -113,16 +113,16 @@ PROGRAMS = $(bin_PROGRAMS)
 am__gngeo_SOURCES_DIST = utility_functions.c utility_functions.h \
 	fileio.c pd4990a.c gngeo_icon.h sound.h fileio.h profiler.c \
 	main.c pd4990a.h video.c video.h memory.c profiler.h list.c \
-	list.h blitter.h font.h memory.h resfile.c timer.c effect.h \
-	frame_skip.c messages.c screen.c timer.h emu.c frame_skip.h \
-	messages.h screen.h unzip.h emu.h neocrypt.c sound.c unzip.c \
-	resfile.h debug.c debug.h neocrypt.h state.c state.h \
-	video_template.h conf.c conf.h transpack.h transpack.c menu.c \
-	menu.h roms.h roms.c mame_layer.h mame_layer.c neoboot.c \
-	event.h event.c stb_image.c stb_image.h stb_zlib.c stb_zlib.h \
-	star_interf.c generator68k_interf.c cyclone_interf.c \
-	raze_interf.c mamez80_interf.c drz80_interf.c video_arm.s \
-	memcpy.S gp2x.h gp2x.c
+	list.h blitter.h fonts.h fonts.c memory.h resfile.c timer.c \
+	effect.h frame_skip.c messages.c screen.c timer.h emu.c \
+	frame_skip.h messages.h screen.h unzip.h emu.h neocrypt.c \
+	sound.c unzip.c resfile.h debug.c debug.h neocrypt.h state.c \
+	state.h video_template.h conf.c conf.h transpack.h transpack.c \
+	menu.c menu.h roms.h roms.c mame_layer.h mame_layer.c \
+	neoboot.c event.h event.c stb_image.c stb_image.h stb_zlib.c \
+	stb_zlib.h star_interf.c generator68k_interf.c \
+	cyclone_interf.c raze_interf.c mamez80_interf.c drz80_interf.c \
+	video_arm.s memcpy.S gp2x.h gp2x.c
 @USE_STARSCREAM_TRUE@am__objects_1 = star_interf.$(OBJEXT)
 @USE_GENERATOR68K_TRUE@am__objects_2 = generator68k_interf.$(OBJEXT)
 @USE_CYCLONE_TRUE@am__objects_3 = cyclone_interf.$(OBJEXT)
@@ -135,10 +135,10 @@ am__gngeo_SOURCES_DIST = utility_functions.c utility_functions.h \
 am_gngeo_OBJECTS = utility_functions.$(OBJEXT) fileio.$(OBJEXT) \
 	pd4990a.$(OBJEXT) profiler.$(OBJEXT) main.$(OBJEXT) \
 	video.$(OBJEXT) memory.$(OBJEXT) list.$(OBJEXT) \
-	resfile.$(OBJEXT) timer.$(OBJEXT) frame_skip.$(OBJEXT) \
-	messages.$(OBJEXT) screen.$(OBJEXT) emu.$(OBJEXT) \
-	neocrypt.$(OBJEXT) sound.$(OBJEXT) unzip.$(OBJEXT) \
-	debug.$(OBJEXT) state.$(OBJEXT) conf.$(OBJEXT) \
+	fonts.$(OBJEXT) resfile.$(OBJEXT) timer.$(OBJEXT) \
+	frame_skip.$(OBJEXT) messages.$(OBJEXT) screen.$(OBJEXT) \
+	emu.$(OBJEXT) neocrypt.$(OBJEXT) sound.$(OBJEXT) \
+	unzip.$(OBJEXT) debug.$(OBJEXT) state.$(OBJEXT) conf.$(OBJEXT) \
 	transpack.$(OBJEXT) menu.$(OBJEXT) roms.$(OBJEXT) \
 	mame_layer.$(OBJEXT) neoboot.$(OBJEXT) event.$(OBJEXT) \
 	stb_image.$(OBJEXT) stb_zlib.$(OBJEXT) $(am__objects_1) \
@@ -376,7 +376,7 @@ SUBDIRS = effect blitter ym2610 $(m68k_subdir) $(z80_subdir) $(gui_subdir)
 gngeo_SOURCES = utility_functions.c utility_functions.h fileio.c \
 	pd4990a.c gngeo_icon.h sound.h fileio.h profiler.c main.c \
 	pd4990a.h video.c video.h memory.c profiler.h list.c list.h \
-	blitter.h font.h memory.h resfile.c timer.c effect.h \
+	blitter.h fonts.h fonts.c memory.h resfile.c timer.c effect.h \
 	frame_skip.c messages.c screen.c timer.h emu.c frame_skip.h \
 	messages.h screen.h unzip.h emu.h neocrypt.c sound.c unzip.c \
 	resfile.h debug.c debug.h neocrypt.h state.c state.h \
@@ -497,6 +497,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileio.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fonts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frame_skip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/generator68k_interf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gp2x.Po@am__quote@

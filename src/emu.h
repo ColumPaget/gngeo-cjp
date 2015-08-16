@@ -29,7 +29,7 @@
 #include "SDL_types.h"
 #define Uintptr long
 
-#define MAX_MESSAGE_LEN 128
+#include "messages.h"
 
 typedef enum SYSTEM {
     SYS_ARCADE=0,
@@ -58,7 +58,6 @@ struct {
     Uint8 sound;
     Uint8 vsync;
     Uint8 snd_st_reg_create;
-    Uint8 do_message;
     Uint8 nb_joy;
     Uint8 raster;
     Uint8 debug;
@@ -75,7 +74,7 @@ struct {
     Uint8 sleep_idle;
     Uint8 screen320;
 
-    char message[MAX_MESSAGE_LEN];
+		TMessage Messages[4];
     char fps[4];
 
     int *p1_key;

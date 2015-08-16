@@ -168,9 +168,9 @@ int frame_skip(int init)
 			    moy=nbFrame_moy/(float)count;
 
 			    if (count==30) count=0;
-			    sprintf(fps_str, "%d %d %d %d\n", nbFrame-1,nbFrame_min-1,nbFrame_max-1,moy-1);
+			    sprintf(fps_str, "fps: %d %d %d %d\n", nbFrame-1,nbFrame_min-1,nbFrame_max-1,moy-1);
 		    } else {
-			    sprintf(fps_str, "%2d", nbFrame-1);
+			    sprintf(fps_str, "fps: %2d", nbFrame-1);
 		    }
 	    
 		    nbFrame = 0;

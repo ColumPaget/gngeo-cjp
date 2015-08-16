@@ -654,14 +654,7 @@ void draw_screen(void) {
 	draw_fix_char(buffer->pixels, 0, 0);
 	SDL_UnlockSurface(buffer);
 
-	if (conf.do_message) {
-		SDL_textout(buffer, visible_area.x + 10, visible_area.h + visible_area.y - 13, conf.message);
-		conf.do_message--;
-	}
-	if (conf.show_fps)
-		SDL_textout(buffer, visible_area.x+8, visible_area.y, fps_str);
-
-
+	output_messages(buffer);
 	screen_update();
 }
 
@@ -840,12 +833,7 @@ void draw_screen_scanline(int start_line, int end_line, int refresh) {
 	if (refresh) {
 		draw_fix_char(buffer->pixels, 0, 0);
 
-		if (conf.do_message) {
-			SDL_textout(buffer, visible_area.x, visible_area.h + visible_area.y - 13, conf.message);
-			conf.do_message--;
-		}
-		if (conf.show_fps)
-			SDL_textout(buffer, visible_area.x, visible_area.y, fps_str);
+		output_messages(buffer);
 		screen_update();
 	}
 }

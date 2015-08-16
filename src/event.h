@@ -19,7 +19,6 @@
 #define EV_SLEEPIDLE 10
 #define EV_FULLSCREEN 11
 
-
 typedef enum {
 	GN_NONE=0,
 	GN_A,

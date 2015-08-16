@@ -222,7 +222,7 @@ static CONF_ITEM * create_conf_item(const char *name, const char *help, char sho
 }
 
 /*
- * Create a boolean confirutation item
+ * Create a boolean configuration item
  * name: Name of conf item
  * help: Brief description of the item
  * short_opt: charatech use for short option
@@ -466,6 +466,10 @@ void cf_init(void) {
 	cf_create_string_item("transpack", "Use the specified transparency pack", "Transpack", 't', "none");
 	cf_create_string_item("p1control", "Player1 control configutation", "...", 0, default_p1control);
 	cf_create_string_item("p2control", "Player2 control configutation", "...", 0, default_p2control);
+	cf_create_string_item("msg1", "Onscreen message 1. format: x:y:msg", "...", 0, "");
+	cf_create_string_item("msg2", "Onscreen message 2. format: x:y:msg", "...", 0, "");
+	cf_create_string_item("msg3", "Onscreen message 3. format: x:y:msg", "...", 0, "");
+
 /*
 #if defined(GP2X) || defined(WIZ)
 	cf_create_string_item("p1control", "Player1 control configutation", "...", 0,

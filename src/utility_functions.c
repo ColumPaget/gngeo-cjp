@@ -12,6 +12,7 @@ if (Src) len=strlen(Src);
 if (Max && (len > Max)) len=Max;
 Dest=(char *) realloc(Dest, len+1);
 strncpy(Dest, Src, len);
+Dest[len]='\0';
 
 return(Dest);
 }

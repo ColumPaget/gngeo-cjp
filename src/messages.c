@@ -29,13 +29,17 @@
 #include "frame_skip.h"
 #include "screen.h"
 #include "sound.h"
+#include "fonts.h"
+#include "conf.h"
+#include "utility_functions.h"
 #include <stdarg.h>
 
+#define MAX_MESSAGE_LEN 128
 
-static int font_w=8;
-static int font_h=9;
+int font_w=8;
 
-void SDL_putchar(SDL_Surface * dest, int x, int y, unsigned char c)
+//returns char width so we can do 'proportional font'
+int SDL_putchar(SDL_Surface * dest, int x, int y, unsigned char c)
 {
     static SDL_Rect font_rect, dest_rect;
     int indice = c - 32;
@@ -46,62 +50,49 @@ void SDL_putchar(SDL_Surface * dest, int x, int y, unsigned char c)
     font_rect.x = indice *  font_w;
     font_rect.y = 0;
     font_rect.w =  font_w;
-    font_rect.h =  font_h;
+    font_rect.h =  MessageFont->height;
     dest_rect.x = x;
     dest_rect.y = y;
     dest_rect.w =  font_w;
-    dest_rect.h =  font_h;
+    dest_rect.h =  MessageFont->height;
 
     SDL_BlitSurface(fontbuf, &font_rect, dest, &dest_rect);
-
+		return((int ) MessageFont->character_widths[indice] & 0xFF);
 }
 
-void SDL_textout(SDL_Surface * dest, int x, int y, const char *string)
+void SDL_textout(SDL_Surface * dest, int x, int y, const char *string, int len)
 {
-	int i;int xx=x;
-	for (i = 0; i < strlen(string); i++) {
-		if (string[i]=='\n') {xx=x;y+=font_h;continue;}
-		SDL_putchar(dest, xx , y, string[i]);
-		xx+=font_w;
+	int i;
+	int xx;
+
+	if (! string) return;
+
+	//remember x and are negative in this calculation, so when we subtract
+	//them we are actually adding
+	if (x < 0) x= visible_area.w - ((len - x) * font_w);
+	if (y < 0) y= visible_area.h - ((0 - y) * MessageFont->height);
+
+	//incase things went negative in the above calculation
+	if (x < 0) x=0;
+	if (y < 0) y=0;
+
+	//I find visible_area.x is 8 points too early, and we lose a character. But I don't want to mess with it
+	//so we'll handle that here
+	x+=visible_area.x + 8;
+	y+=visible_area.y;
+
+	xx=x;
+	for (i = 0; i < len; i++) 
+	{
+		//This was all compressed into one line. Makes it easy to misunderstand what's being done, so I expanded it
+		if (string[i]=='\n') 
+		{
+			xx=x;
+			y+=MessageFont->height;
+			continue;
+		}
+		xx+=SDL_putchar(dest, xx , y, string[i]);
 	}
-}
-
-#if 0
-
-/* TODO: Use blitter instead of direct screen access */
-void error_box(char *fmt,...) {
-	char buf[512];
-	va_list pvar;
-	va_start(pvar,fmt);
-	SDL_Rect r={32,32,320-64,240-64};
-
-	SDL_FillRect(screen,&r,0xF011);
-	
-	vsnprintf(buf,511,fmt,pvar);
-	SDL_textout(screen,40,40,buf);
-
-	sleep(5);
-}
-
-#endif
-//static timer_struct *msg_timer;
-/*
-void stop_message(int param)
-{
-  conf.do_message=0;
-  msg_timer=NULL;
-}
-*/
-void draw_message(const char *string)
-{
-    /*
-       if (msg_timer!=NULL)
-       del_timer(msg_timer);
-       msg_timer=NULL;
-     */
-    strncpy(conf.message, string, MAX_MESSAGE_LEN);
-    conf.do_message = 75;
-    //msg_timer=insert_timer(1.0,0,stop_message);
 }
 
 
@@ -114,7 +105,6 @@ int SDL_getchar(void)
 {
     SDL_Event event;
     SDL_WaitEvent(&event);
-    //while(SDL_PollEvent(&event)){}
     switch (event.type) {
     case SDL_KEYDOWN:
 	switch(event.key.keysym.sym) {
@@ -158,7 +148,7 @@ void text_input(const char *message,int x,int y,char *string,int size)
 
     SDL_FillRect(buffer,&clear_rect,0);
 //    SDL_BlitSurface(buffer,&clear_rect,save,NULL);
-    SDL_textout(buffer,x,y,message);
+    SDL_textout(buffer,x,y,message,sstrlen(message));
     sx=x+strlen(message)* font_w;
     SDL_EnableUNICODE(1);
     while((a=SDL_getchar())!=-1) {
@@ -185,8 +175,8 @@ void text_input(const char *message,int x,int y,char *string,int size)
 	}
 	SDL_FillRect(buffer,&clear_rect,0);
 	//SDL_BlitSurface(save,NULL,buffer,&clear_rect);
-	SDL_textout(buffer,x,y,message);
-	SDL_textout(buffer,sx,y,string);
+	SDL_textout(buffer,x,y,message,sstrlen(message));
+	SDL_textout(buffer,sx,y,string,sstrlen(string));
 	/* cursor */
 	((Uint16*)buffer->pixels)[352*(16+222)+sx+pos* font_w-1]=0;
 	for(i=sx+pos* font_w;i<sx+pos* font_w+ font_w;i++) {
@@ -200,4 +190,86 @@ void text_input(const char *message,int x,int y,char *string,int size)
     SDL_EnableUNICODE(0);
     if (conf.sound) pause_audio(0);
     reset_frame_skip();
+}
+
+
+
+//this puts a message into a slot (there's 4 slots for messages)
+//the actual drawing of the message on the screen is done through 'output_messages' (below)
+//which calls SDL_textout (above, near top)
+void draw_message(int slot, int x, int y, const char *string, int duration)
+{
+	TMessage *m;
+
+		//Only 4 slots for messages!
+		if ((slot < 0) || (slot > 4)) return;
+		m=conf.Messages+slot;
+		m->len=strlen(string);
+		m->string=rstrcpy(m->string, string, MAX_MESSAGE_LEN);
+    m->duration = duration;
+		m->x=x;
+		m->y=y;
+	printf("dm: %d [%s] [%s]\n",m->duration,string,m->string);
+}
+
+
+
+void output_messages(SDL_Surface *Surface)
+{
+TMessage *m;
+int i;
+
+for (i=0; i < 4; i++)
+{
+	m=conf.Messages+i;
+  if (m->duration) 
+	{
+    SDL_textout(Surface, m->x, m->y, m->string,m->len);
+    m->duration--;
+	}
+}
+
+if (conf.show_fps) SDL_textout(buffer, 8, 0, fps_str, sstrlen(fps_str));
+}
+
+
+void init_messages()
+{
+char *buff=NULL, *ptr, *dptr;
+int x, y, i;
+
+	//init TMessage structures
+	memset(conf.Messages,0,sizeof(TMessage) * 4);
+
+	for (i=1; i < 4; i++)
+	{
+		buff=realloc(buff,20+1);
+		snprintf(buff,20,"Msg%d",i);
+    ptr=cf_get_string_by_name(buff);
+    if (strlen(ptr))
+    {
+			x=strtol(ptr,&ptr,10);
+			if (*ptr==':') ptr++;
+			y=strtol(ptr,&ptr,10);
+			if (*ptr==':') ptr++;
+			
+			buff=realloc(buff,sstrlen(ptr)+1);
+			dptr=buff;
+			for (; *ptr !='\0'; ptr++)
+			{
+				if (*ptr=='\\')
+				{
+					ptr++;
+					if (*ptr=='n') *dptr='\n';
+					else *dptr=*ptr;
+				}
+				else *dptr=*ptr;
+				dptr++;
+			}
+			*dptr='\0';
+      draw_message(i,x,y,buff,9999999);
+    }
+	}
+
+free(buff);
 }
