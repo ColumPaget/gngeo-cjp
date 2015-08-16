@@ -750,7 +750,7 @@ printf("OPEN: %s\n",conf_file);
 		if (discard_line(buf))
 			continue;
 	
-		ptr=get_token(buf, " ", &name);
+		ptr=get_token(buf, " =", &name);
 
 		cf = cf_get_item_by_name(name);
 		if (cf && !(cf->flags & CF_SETBYCMD) && (!cf->modified)) {

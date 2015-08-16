@@ -240,6 +240,10 @@ if (event->type == SDL_KEYDOWN)
 			return EV_SLOW_MOTION;
 			break;
 
+			case SDLK_F7:
+			return EV_CYCLE_MSG;
+			break;
+
 			case SDLK_F10:
 			return EV_AUTOFRAMESKIP; 
 			break;

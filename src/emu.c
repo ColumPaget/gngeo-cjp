@@ -422,6 +422,10 @@ void main_loop(void) {
 					case EV_FULLSCREEN:
 					screen_fullscreen();
 					break;
+		
+					case EV_CYCLE_MSG:
+					cycle_submessages();
+					break;	
 
 					/*
 					case EV_SCANLINE:

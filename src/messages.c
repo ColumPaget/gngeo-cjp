@@ -234,8 +234,6 @@ int len=-1, space=100, val;
 struct tm *Time=NULL;
 time_t secs;
 
-printf("Fmt mss: %s\n",MsgStr);
-
 RetStr=realloc(RetStr, space+1);
 
 for (ptr=MsgStr; *ptr !='\0'; ptr++)
@@ -247,6 +245,10 @@ for (ptr=MsgStr; *ptr !='\0'; ptr++)
 		{
 			case '%':
 				RetStr=msg_add_char(RetStr, '%', &len, &space);
+			break;
+
+			case 'g':
+				RetStr=msg_add_str(RetStr, conf.game, &len, &space);
 			break;
 
 			case 'h':
@@ -354,10 +356,32 @@ return(RetStr);
 }
 
 
+
+char *curr_submessage(char *submsg, TMessage *m)
+{
+const char *ptr;
+int s;
+
+	ptr=m->msg_template;
+	for (s=0; s <= m->submsg_count; s++)
+	{
+		if (! sstrlen(ptr))
+		{
+		m->submsg_count=0;
+		ptr=get_token(m->msg_template,"|",&submsg);
+		break;
+		}
+		ptr=get_token(ptr,"|",&submsg);
+	}
+return(submsg);
+}
+
+
 //this actually calls the functions taht draw messages on the screen
 void output_messages(SDL_Surface *Surface)
 {
 TMessage *m;
+char *submsg=NULL;
 int i;
 
 for (i=0; i < 4; i++)
@@ -370,7 +394,9 @@ for (i=0; i < 4; i++)
 			m->refresh_count--;
 			if (m->refresh_count < 1)
 			{
-			m->string=format_message(m->string, m->msg_template);
+			submsg=curr_submessage(submsg, m);
+			m->string=format_message(m->string, submsg);
+			m->len=sstrlen(m->string);
 			m->refresh_count=m->refresh;
 			}
 		}
@@ -382,6 +408,8 @@ for (i=0; i < 4; i++)
 }
 
 if (conf.show_fps) SDL_textout(buffer, 8, 0, fps_str, sstrlen(fps_str));
+
+if (submsg) free(submsg);
 }
 
 
@@ -391,18 +419,45 @@ if (conf.show_fps) SDL_textout(buffer, 8, 0, fps_str, sstrlen(fps_str));
 void draw_message(int slot, int x, int y, const char *msg, int duration)
 {
 	TMessage *m;
+	char *submsg=NULL;
 
 		//Only 4 slots for messages!
 		if ((slot < 0) || (slot > 4)) return;
 		m=conf.Messages+slot;
 		if (strchr(msg,'%')) m->refresh=60;
 		m->msg_template=rstrcpy(m->msg_template, msg, MAX_MESSAGE_LEN);
-		m->string=format_message(m->string, msg);
+		
+		get_token(msg,"|",&submsg);
+		m->string=format_message(m->string, submsg);
 		m->len=strlen(m->string);
     m->duration = duration;
 		m->x=x;
 		m->y=y;
-	printf("dm: %d [%s] [%s]\n",m->duration,msg,m->string);
+
+	if (submsg) free(submsg);
+}
+
+
+//this updates 'submessage count' for user-defined messages
+//which allows us to cycle through a number of strings for a message
+void cycle_submessages()
+{
+TMessage *m;
+char *submsg=NULL, *ptr;
+int i;
+
+//start at slot 1, slot 0 is system messages that don't have this feature
+for (i=1; i < 4; i++)
+{
+	m=conf.Messages+i;
+  m->submsg_count++;
+	submsg=curr_submessage(submsg, m);
+	m->string=format_message(m->string, submsg);
+	m->len=sstrlen(m->string);
+}
+
+
+if (submsg) free(submsg);
 }
 
 

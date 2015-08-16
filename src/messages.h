@@ -36,12 +36,14 @@ int width;
 int duration;
 int refresh;
 int refresh_count;
+int submsg_count;
 char *msg_template;
 char *string;
 }TMessage; 
 
 void init_messages();
 void output_messages(SDL_Surface *Surface);
+void cycle_submessages();
 void draw_message(int slot, int x, int y, const char *string, int duration);
 void stop_message(int param);
 void SDL_textout(SDL_Surface * dest, int x, int y, const char *string, int len);

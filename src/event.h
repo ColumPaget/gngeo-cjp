@@ -18,6 +18,7 @@
 #define EV_AUTOFRAMESKIP 9
 #define EV_SLEEPIDLE 10
 #define EV_FULLSCREEN 11
+#define EV_CYCLE_MSG 12
 
 typedef enum {
 	GN_NONE=0,
