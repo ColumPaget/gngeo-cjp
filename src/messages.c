@@ -226,6 +226,7 @@ return(RetStr);
 }
 
 
+
 char *format_message(char *RetStr, const char *MsgStr)
 {
 const char *ptr;
@@ -250,6 +251,32 @@ for (ptr=MsgStr; *ptr !='\0'; ptr++)
 			case 'g':
 				RetStr=msg_add_str(RetStr, conf.game, &len, &space);
 			break;
+
+			case 's':
+				switch (conf.system)
+				{
+					case SYS_ARCADE: Tempstr=rstrcpy(Tempstr,"arcade",20); break;
+					case SYS_HOME: Tempstr=rstrcpy(Tempstr,"home",20); break;
+					case SYS_UNIBIOS: Tempstr=rstrcpy(Tempstr,"unibios",20); break;
+					case SYS_MAX: Tempstr=rstrcpy(Tempstr,"max",20); break;
+					default: Tempstr=rstrcpy(Tempstr,"unknown",20); break;
+				}
+				RetStr=msg_add_str(RetStr, Tempstr, &len, &space);
+			break;
+
+			case 'c':
+				switch (conf.country)
+				{
+					case CTY_JAPAN: Tempstr=rstrcpy(Tempstr,"jp",20); break;
+					case CTY_USA: Tempstr=rstrcpy(Tempstr,"usa",20); break;
+					case CTY_EUROPE: Tempstr=rstrcpy(Tempstr,"eu",20); break;
+					case CTY_ASIA: Tempstr=rstrcpy(Tempstr,"asia",20); break;
+					case CTY_MAX: Tempstr=rstrcpy(Tempstr,"max",20); break;
+					default: Tempstr=rstrcpy(Tempstr,"unknown",20); break;
+				}
+				RetStr=msg_add_str(RetStr, Tempstr, &len, &space);
+			break;
+
 
 			case 'h':
 				Tempstr=(char *)realloc(Tempstr,1025);

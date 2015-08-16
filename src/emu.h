@@ -75,7 +75,7 @@ struct {
     Uint8 screen320;
 
 		TMessage Messages[4];
-    char fps[4];
+    //char fps[4];
 
     int *p1_key;
     int *p2_key;

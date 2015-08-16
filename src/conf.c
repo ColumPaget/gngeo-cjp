@@ -738,8 +738,10 @@ bool cf_open_file(char *filename)
 #endif
 	}
 
-	if ((f = fopen(conf_file, "rb")) == 0) {
-		//printf("Unable to open %s\n",conf_file);
+	(f = fopen(conf_file, "rb"));
+	if (! f)
+	{
+		printf("ERROR: Unable to open %s\n",conf_file);
 		return false;
 	}
 printf("OPEN: %s\n",conf_file);
