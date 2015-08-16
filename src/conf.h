@@ -66,6 +66,7 @@ typedef struct CONF_ITEM {
 #define CF_STR_ARRAY_SIZE(t) t->data.dt_str_array.size
 
 CONF_ITEM* cf_get_item_by_name(const char *name);
+char *cf_default_path(char *conf_file, const char *filename, const char *extn);
 void cf_create_bool_item(const char *name,const char *help,char short_opt,bool def);
 void cf_create_action_item(const char *name,const char *help,char short_opt,int (*action)(struct CONF_ITEM *self));
 void cf_create_action_arg_item(const char *name,const char *help,const char *hlp_arg,char short_opt,int (*action)(struct CONF_ITEM *self));

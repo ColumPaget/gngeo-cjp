@@ -45,6 +45,7 @@
 #include "event.h"
 #include "menu.h"
 #include "frame_skip.h"
+#include "utility_functions.h"
 
 #ifdef USE_GUI
 #include "gui_interf.h"
@@ -149,8 +150,7 @@ static void catch_me(int signo) {
 }
 int main(int argc, char *argv[])
 {
-    char *rom_name=NULL, *ptr;
-
+    char *rom_name=NULL, *Tempstr=NULL, *ptr;
 
 
 #ifdef __AMIGA__
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
     SetProgramDir(file_lock);
 #endif
 
-	//Don't fucking catch sigsegvs!! Fix them!
+	//Don't catch sigsegvs!! Fix them!
 	//signal(SIGSEGV, catch_me);
 
 #ifdef WII
@@ -171,7 +171,18 @@ int main(int argc, char *argv[])
     cf_init_cmd_line();
 
 		cf_parse_cmd_line(argc,argv, &rom_name);
-    cf_open_file(cf_get_string_by_name("config")); /* Open Default configuration file */
+
+		//did we get a config from cmd line?
+    Tempstr=rstrcpy(Tempstr, cf_get_string_by_name("config"), 1024); 
+		//if not, then if we got a rom name, try loading conf for that
+		if ((! sstrlen(Tempstr)) && sstrlen(rom_name)) Tempstr=cf_default_path(Tempstr, rom_name, ".conf");
+		//else open Default configuration file
+		if ((! sstrlen(Tempstr)) || (! cf_open_file(Tempstr)))
+		{
+			Tempstr=cf_default_path(Tempstr, "gngeorc","");
+    	cf_open_file(Tempstr); 
+		}
+
 		//cf_parse_cmd_line(argc,argv, &rom_name);
 		//printf("rom_name: %s\n",rom_name);
 

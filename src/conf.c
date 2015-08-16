@@ -115,6 +115,34 @@ static int default_p2hotkey1[] = {0, 0, 0, 0};
 static int default_p2hotkey2[] = {0, 0, 0, 0};
 static int default_p2hotkey3[] = {0, 0, 0, 0};
 
+
+
+//generate config-file default path for various systems
+char *cf_default_path(char *conf_file, const char *filename, const char *extn)
+{
+int len;
+
+		len=sstrlen(filename)+sstrlen(extn);
+
+#ifdef EMBEDDED_FS
+		len+= sstrlen(ROOTPATH) + sstrlen("conf/") + 1;
+		conf_file = (char *) realloc(conf_file, len * sizeof (char));
+		sprintf(conf_file, "%s%s%s%s",ROOTPATH,"conf/",filename,extn);
+#elif __AMIGA__
+		len+=sstrlen("/PROGDIR/data/") + 1;
+		conf_file = (char *) realloc(conf_file, len * sizeof (char));
+		sprintf(conf_file, "%s%s%s","/PROGDIR/data/",filename,extn);
+#else
+		len += sstrlen(getenv("HOME")) + sstrlen("/.gngeo/") + 1;
+		conf_file = (char *) realloc(conf_file, len * sizeof (char));
+		sprintf(conf_file, "%s/.gngeo/%s%s", getenv("HOME"),filename,extn);
+#endif
+
+return(conf_file);
+}
+
+
+
 void cf_cache_conf(void) {
 	char *country;
 	char *system;
@@ -549,7 +577,7 @@ char *my_fgets(char *s, int size, FILE *stream) {
 }
 
 bool cf_save_file(char *filename, int flags) {
-	char *conf_file = filename;
+	char *conf_file = NULL;
 	char *conf_file_dst;
 	FILE *f;
 	FILE *f_dst;
@@ -558,26 +586,15 @@ bool cf_save_file(char *filename, int flags) {
 	char *name=NULL, *ptr;
 	CONF_ITEM *cf;
 
-	if (!conf_file) {
-#ifdef EMBEDDED_FS
-		int len = strlen("gngeorc") + strlen(ROOTPATH"conf/") + 1;
-		conf_file = (char *) alloca(len * sizeof (char));
-		sprintf(conf_file, ROOTPATH"conf/gngeorc");
-#elif __AMIGA__
-		int len = strlen("gngeorc") + strlen("/PROGDIR/data/") + 1;
-		conf_file = (char *) alloca(len * sizeof (char));
-		sprintf(conf_file, "/PROGDIR/data/gngeorc");
-#else /* POSIX */
-		int len = strlen("gngeorc") + strlen(getenv("HOME")) + strlen("/.gngeo/") + 1;
-		conf_file = (char *) alloca(len * sizeof (char));
-		sprintf(conf_file, "%s/.gngeo/gngeorc", getenv("HOME"));
-#endif
-	}
+	if (! sstrlen(filename)) conf_file=cf_default_path(conf_file, "gngeorc", "");
+	else conf_file=rstrcpy(conf_file, filename, 1024);
+
 	conf_file_dst = alloca(strlen(conf_file) + 4);
 	sprintf(conf_file_dst, "%s.t", conf_file);
 
 	if ((f_dst = fopen(conf_file_dst, "w")) == 0) {
 		//printf("Unable to open %s\n",conf_file);
+		if (conf_file) free(conf_file);
 		return false;
 	}
 
@@ -677,6 +694,7 @@ bool cf_save_file(char *filename, int flags) {
 	rename(conf_file_dst, conf_file);
 
 	if (name) free(name);
+	if (conf_file) free(conf_file);
 
 	return true;
 }
@@ -711,40 +729,23 @@ void cf_reset_to_default(void) {
 	}
 }
 
+
+
 bool cf_open_file(char *filename) 
 {
 	/* if filename==NULL, we use the default one: $HOME/.gngeo/gngeorc */
-	char *conf_file = filename;
 	FILE *f;
 	int i = 0;
 	char buf[512];
 	char *name=NULL, *ptr;
 	CONF_ITEM *cf;
 
-	if (! sstrlen(conf_file)) 
-	{
-#ifdef EMBEDDED_FS
-		int len = strlen("gngeorc") + strlen(ROOTPATH"conf/") + 1;
-		conf_file = (char *) alloca(len * sizeof (char));
-		sprintf(conf_file, ROOTPATH"conf/gngeorc");
-#elif __AMIGA__
-		int len = strlen("gngeorc") + strlen("/PROGDIR/data/") + 1;
-		conf_file = (char *) alloca(len * sizeof (char));
-		sprintf(conf_file, "/PROGDIR/data/gngeorc");
-#else
-		int len = strlen("gngeorc") + strlen(getenv("HOME")) + strlen("/.gngeo/") + 1;
-		conf_file = (char *) alloca(len * sizeof (char));
-		sprintf(conf_file, "%s/.gngeo/gngeorc", getenv("HOME"));
-#endif
-	}
-
-	(f = fopen(conf_file, "rb"));
+	f = fopen(filename, "rb");
 	if (! f)
 	{
-		printf("ERROR: Unable to open %s\n",conf_file);
+		printf("ERROR: Unable to open %s\n",filename);
 		return false;
 	}
-printf("OPEN: %s\n",conf_file);
 
 	while (!feof(f)) {
 		i = 0;
@@ -756,7 +757,6 @@ printf("OPEN: %s\n",conf_file);
 
 		cf = cf_get_item_by_name(name);
 		if (cf && !(cf->flags & CF_SETBYCMD) && (!cf->modified)) {
-			printf("Option %s\n",cf->name);
 			switch (cf->type) {
 				case CFT_INT:
 					CF_VAL(cf) = atoi(ptr);
