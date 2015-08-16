@@ -15,3 +15,6 @@ Z80 Emulation :
 
 YM2610 emulation:
  . Tatsuyuki Satoh
+
+general tinkering:
+ . Colum Paget (fixes for segfaults in gngeo-0.8, function keys working again, proportional font, user messages)
