@@ -120,6 +120,17 @@ Emulate the NeoGeo rom designed by ROMSET
 All boolean options can be disabled with --no-OPTION
 (Ex: --no-sound turn sound off)
 
+
+CONFIGURATION :
+	All configuration can be done in $HOME/.gngeo/gngeorc
+	a sample file is provide : sample_gngeorc
+	Every option are also accessible on the command line.
+	Per game configuration is also possible in $HOME/.gngeo/game.rc
+	
+	By default, gngeo search bios and games in
+	$prefix/share/gngeo/ (the game must be in a zip file, the bios not)
+
+SCREEN MESSAGES:
 the msg1, msg2 and msg3 options allow the specification of up to three messages
 to be displayed on the screen. This has the format:
 
@@ -133,28 +144,53 @@ msg is the message itself. This can contain the string '\n' to represent a newli
 format strings in the form:
 
 %h - hostname
+%g - game/rom name
+%s - system type of rom
+%c - country/region for rom
 %H - hour
 %M - minute
 %S - seconds
 %d - day
 %m - month
 %y - 2-digit year
-%Y - 4-digit year
+%Y- 4-digit year
 
-more format strings will likely be added when I can decide on what's useful.
+messages can also be broken up into 'submessages', by being seperated with the 
+pipe character '|'. These sub-messages can then be cycled through using the F7
+key.
 
 This feature is intended to allow a 'crib' of moves to be displayed onscreen, esp. for
-fighting games that tend to have a lot of 'hcf-a,d,d,d' special moves. 
+fighting games that tend to have a lot of 'hcf-a,d,d,d' special moves. As fighting
+games have multiple characters, one can define submessages and cycle through to the
+messages appropriate for a given character. So, for instance the line below 
+
+Msg1=JURI gb:<-B ls:f,fd,d+ABC rs:d,fd,f+ABC sk:d,db,b+ABC|ROOMI sp:j,d+C rb:d,fd,f+ABC rc:b,f+ABC rB:j+ABC|GUNTER: BS:C gb:f,d,df+ABC ws:360+ABC hb:360+A+B+C|%g-%s-%c %H:%M:%S|
+
+Contains some moves for three characters from 'Galaxy Fight' and a status display as the last selection
 
 
-CONFIGURATION :
-	All configuration can be done in $HOME/.gngeo/gngeorc
-	a sample file is provide : sample_gngeorc
-	Every option are also accessible on the command line.
-	Per game configuration is also possible in $HOME/.gngeo/game.rc
-	
-	By default, gngeo search bios and games in
-	$prefix/share/gngeo/ (the game must be in a zip file, the bios not)
+GAME-SPECIFIC CONFIG FILES
+
+If no config-file is specified on the command-line, but a game/rom name is, then
+an attempt will be name to load a config file <romname>.conf from the config
+directory. If this fails the default gngeorc file will be loaded instead.
+
+FUNCTION KEYS
+
+Function keys perform the following actions
+
+ESCAPE	Emulator Menu
+F1			Reset Emulator
+F2			Screenshot
+F3			Test switch (enter game setup)
+F4			Show Keysyms
+F5			Show Frames per second
+F6			Slow Motion
+F7			Cycle user messages
+F10			Auto frameskip
+F11			Sleep when idle
+F12			Full Screen
+
 
 FRONTEND :
 	GGF:      The first frontend available for gngeo. It's written in Java, support

@@ -736,7 +736,7 @@ bool cf_open_file(char *filename)
 	/* if filename==NULL, we use the default one: $HOME/.gngeo/gngeorc */
 	FILE *f;
 	int i = 0;
-	char buf[512];
+	char *buf=NULL;
 	char *name=NULL, *ptr;
 	CONF_ITEM *cf;
 
@@ -747,9 +747,10 @@ bool cf_open_file(char *filename)
 		return false;
 	}
 
+	buf=calloc(8192,sizeof(char));
 	while (!feof(f)) {
 		i = 0;
-		my_fgets(buf, 510, f);
+		my_fgets(buf, 8190, f);
 		if (discard_line(buf))
 			continue;
 	
@@ -765,7 +766,8 @@ bool cf_open_file(char *filename)
 					CF_BOOL(cf) = (strcasecmp(ptr, "true") == 0 ? true : false);
 					break;
 				case CFT_STRING:
-					CF_STR(cf)=rstrcpy(CF_STR(cf), ptr, 1024);
+					printf("ST: %s\n",ptr);
+					CF_STR(cf)=rstrcpy(CF_STR(cf), ptr, 8190);
 					break;
 				case CFT_ARRAY:
 					read_array(CF_ARRAY(cf), ptr, CF_ARRAY_SIZE(cf));
@@ -785,6 +787,8 @@ bool cf_open_file(char *filename)
 	}
 
 	if (name) free(name);
+	if (buf) free(buf);
+
 	cf_cache_conf();
 	return true;
 }

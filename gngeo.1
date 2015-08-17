@@ -61,7 +61,7 @@ $ gngeo -i /home/flurbly/neogeo/roms mslug2
 .PP
 The ROM location, as well as any other options, can be persistently set in the
 $HOME/.gngeo/gngeorc.  A sample gngeorc can be found in /usr/share/doc/gngeo;
-copy it into your .gngeo directory and adapt it to your needs.
+copy it into your .gngeo directory and adapt it to your needs. Per-game config files can be created, named <game name>.conf, and these are also searched for in the .gngeo directory.
 .SH OPTIONS
 These programs follow the usual GNU command line syntax, with long
 options starting with two dashes (`-').
@@ -85,9 +85,9 @@ speed.
 Use the specified blitter. \fB-b help\fP will provide a list of available
 blitters.  \fBsoft\fP, \fBopengl\fP, and \fByuv\fP are typical choices.
 .TP
-.B \-c, \-\-convtile
+.B \-c, \-\-config=PATH
 .br
-Convert graphics tiles into internal format at load time (default on).
+Path to config file
 .TP
 .B \-\-country=STRING
 .br
@@ -116,10 +116,6 @@ performance if your video hardware/drivers are fast.
 Enable interpolation from one frame to the next.  This can make the display
 look "smoother", but has a performance penalty.
 .TP
-.B \-\-invertjoy
-.br
-Invert joystick order. (need more details)
-.TP
 .B \-\-joystick
 .br
 Enable joystick support.
@@ -128,20 +124,28 @@ Enable joystick support.
 .br
 Use STRING as libGL (default should normally be okay).
 .TP
+.B     \-\-msg1=<xpos>:<ypos>:msg
+.br
+User message 1. See 'USER MESSAGES' below.
+.TP
+.B     \-\-msg2=<xpos>:<ypos>:msg
+.br
+User message 2. See 'USER MESSAGES' below.
+.TP
+.B     \-\-msg3=<xpos>:<ypos>:msg
+.br
+User message 3. See 'USER MESSAGES' below.
+.TP
 .B \-P, \-\-pal
 .br
 Use PAL timings.  This currently has bugs.
 .TP
-.B \-\-p1key=ARRAY
+.B \-\-p1control=ARRAY
 .TP
-.B \-\-p2key=ARRAY
+.B \-\-p2control=ARRAY
 .TP
-.B \-\-p1joy=ARRAY
-.TP
-.B \-\-p2joy=ARRAY
 .br
-Player 1 and Player 2 keyboard and joystick mappings, respectively.
-(need more details)
+Player 1 and Player 2 keyboard and joystick mappings.
 .TP
 .B \-r, \-\-raster
 .br
@@ -151,11 +155,6 @@ Enable the raster interrupt. (need more details)
 .br
 Give the path to locate the ROM collection.  The default is to look
 in /usr/share/gngeo, but your ROM collection is most likely not there. :)
-.TP
-.B \-d, \-\-romrc=[path]
-.br
-Give the path to locate the romrc file.  This defines the layout of the games
-and is required to run any Neo-Geo games.
 .TP
 .B \-\-sound
 .br
@@ -176,7 +175,7 @@ emulator "nicer" to the rest of the system.
 .br
 This option allows you to set the type of the emulated system to \fBhome\fP or \fBarcade\fP,
 depending on how you prefer to play your games.  There are some differences in many games
-if they detect a home system instead of an arcade system.
+if they detect a home system instead or an arcade system.
 .TP
 .B \-\-scale=N
 .br
@@ -195,6 +194,76 @@ Use the specified transparency pack (need more details)
 .B \-h, \-\-help
 .br
 Show summary of options.
+.TP
+.B \-v, \-\-version
+.br
+Show program version
+.SH SCREEN MESSAGES
+.PP
+the msg1, msg2 and msg3 options allow the specification of up to three messages
+to be displayed on the screen. This has the format:
+.PP
+x\-pos:y\-pos:msg
+.PP
+where x\-pos and y\-pos are numeric x and y positions for the message. Negative values of x\-pos and y\-pos will result in the message being positioned relative to the maximum x or y position (so back from the right edge or up from the bottom).
+.PP
+msg is the message itself. This can contain the string '\n' to represent a newline, or format strings in the form:
+.PP
+%h \- hostname
+.br
+%g \- game/rom name
+.br
+%s \- system type of rom
+.br
+%c \- country/region for rom
+.br
+%H \- hour
+.br
+%M \- minute
+.br
+%S \- seconds
+.br
+%d \- day
+.br
+%m \- month
+.br
+%y \- 2-digit year
+.br
+%Y-\` 4-digit year
+.PP
+messages can also be broken up into 'submessages', by being seperated with the
+pipe character '|'. These sub-messages can then be cycled through using the F7 key.
+.PP
+This feature is intended to allow a 'crib' of moves to be displayed onscreen, esp. for fighting games that tend to have a lot of 'hcf\-a,d,d,d' special moves. As fighting games have multiple characters, one can define submessages and cycle through to the messages appropriate for a given character. So, for instance the line below
+.TP
+Msg1=JURI gb:<\-B ls:f,fd,d+ABC rs:d,fd,f+ABC sk:d,db,b+ABC|ROOMI sp:j,d+C rb:d,fd,f+ABC rc:b,f+ABC rB:j+ABC|GUNTER: BS:C gb:f,d,df+ABC ws:360+ABC hb:360+A+B+C|%g\-%s\-%c %H:%M:%S|
+.PP
+Contains some moves for three characters from 'Galaxy Fight' and a status display as the last selection
+.SH FUNCTION KEYS
+.TP
+Function keys perform the following actions
+.PP
+ESCAPE  Emulator Menu
+.br
+F1      Reset Emulator
+.br
+F2      Screenshot
+.br
+F3      Test switch (enter game setup)
+.br
+F4      Show Keysyms
+.br
+F5      Show Frames per second
+.br
+F6      Slow Motion
+.br
+F7      Cycle user messages
+.br
+F10     Auto frameskip
+.br
+F11     Sleep when idle
+.br
+F12     Full Screen
 .SH HARDWARE
 The SNK Neo-Geo system was cartridge-based and was sold to arcades as well as
 homes.  It has a 68000 CPU, a Z80 for sound, and custom graphics hardware, and

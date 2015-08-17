@@ -36,8 +36,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#define MAX_MESSAGE_LEN 128
-
 int font_w=8;
 
 //returns char width so we can do 'proportional font'
@@ -267,11 +265,11 @@ for (ptr=MsgStr; *ptr !='\0'; ptr++)
 			case 'c':
 				switch (conf.country)
 				{
-					case CTY_JAPAN: Tempstr=rstrcpy(Tempstr,"jp",20); break;
-					case CTY_USA: Tempstr=rstrcpy(Tempstr,"usa",20); break;
-					case CTY_EUROPE: Tempstr=rstrcpy(Tempstr,"eu",20); break;
-					case CTY_ASIA: Tempstr=rstrcpy(Tempstr,"asia",20); break;
-					case CTY_MAX: Tempstr=rstrcpy(Tempstr,"max",20); break;
+					case CTY_JAPAN: Tempstr=rstrcpy(Tempstr,"JP",20); break;
+					case CTY_USA: Tempstr=rstrcpy(Tempstr,"USA",20); break;
+					case CTY_EUROPE: Tempstr=rstrcpy(Tempstr,"EU",20); break;
+					case CTY_ASIA: Tempstr=rstrcpy(Tempstr,"ASIA",20); break;
+					case CTY_MAX: Tempstr=rstrcpy(Tempstr,"MaX",20); break;
 					default: Tempstr=rstrcpy(Tempstr,"unknown",20); break;
 				}
 				RetStr=msg_add_str(RetStr, Tempstr, &len, &space);
@@ -452,7 +450,7 @@ void draw_message(int slot, int x, int y, const char *msg, int duration)
 		if ((slot < 0) || (slot > 4)) return;
 		m=conf.Messages+slot;
 		if (strchr(msg,'%')) m->refresh=60;
-		m->msg_template=rstrcpy(m->msg_template, msg, MAX_MESSAGE_LEN);
+		m->msg_template=rstrcpy(m->msg_template, msg, 8192);
 		
 		get_token(msg,"|",&submsg);
 		m->string=format_message(m->string, submsg);

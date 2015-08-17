@@ -220,10 +220,6 @@ if (event->type == SDL_KEYDOWN)
 			return EV_TEST_SWITCH;
 			break;
 
-			case SDLK_F12:
-			return EV_FULLSCREEN;
-		  break;
-
      	case SDLK_F4:
 				//we handle this here, because this .c file is where the keysyms come in
 			  show_keysym = 1 - show_keysym;
@@ -251,6 +247,11 @@ if (event->type == SDL_KEYDOWN)
 			case SDLK_F11:
 			return EV_SLEEPIDLE;
 			break;
+
+			case SDLK_F12:
+			return EV_FULLSCREEN;
+		  break;
+
 
 			default:
 			break;
