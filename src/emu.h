@@ -66,6 +66,7 @@ struct {
     Uint8 extra_xor;
     Uint8 pal;
     Uint8 accurate940;
+    Uint8 joystick;
     SYSTEM system;
     COUNTRY country;
 

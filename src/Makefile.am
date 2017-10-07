@@ -1,5 +1,6 @@
 #INCLUDES = -DDATA_DIRECTORY='"${pkgdatadir}"'
-AM_CPPFLAGS = -DDATA_DIRECTORY=\"$(pkgdatadir)\"
+AM_CPPFLAGS = -DDATA_DIRECTORY=\"$(pkgdatadir)\" -DROMPATH=\"$(ROMPATH)\" -DBIOSPATH=\"$(BIOSPATH)\"
+AM_CFLAGS = -DDATA_DIRECTORY=\"$(pkgdatadir)\" -DROMPATH=\"$(ROMPATH)\" -DBIOSPATH=\"$(BIOSPATH)\"
 
 SUBDIRS = effect blitter ym2610 $(m68k_subdir) $(z80_subdir) $(gui_subdir)
 
@@ -19,6 +20,7 @@ gngeo_SOURCES = utility_functions.c utility_functions.h       \
 	transpack.h      transpack.c      menu.c            menu.h          \
 	roms.h           roms.c         	\
 	mame_layer.h     mame_layer.c     neoboot.c         event.h   event.c \
+	joysticks.c      joysticks.h \
   stb_image.c      stb_image.h      stb_zlib.c		stb_zlib.h      
 
 # Platform dependant source and lib

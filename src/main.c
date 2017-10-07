@@ -85,16 +85,15 @@ void calculate_hotkey_bitmasks()
 }
 
 void sdl_set_title(char *name) {
-    char *title;
+    char *title=NULL;
+
     if (name) {
-	title = malloc(strlen("Gngeo : ")+strlen(name)+1);
-	if (title) {
-	  sprintf(title,"Gngeo : %s",name);
+	  title=rstrbuild(title,"Gngeo : ",name, NULL);
 	  SDL_WM_SetCaption(title, NULL);
-	}
     } else {
 	SDL_WM_SetCaption("Gngeo", NULL);
     }
+	if (title) free(title);
 }
 
 
@@ -135,7 +134,7 @@ void init_sdl(void /*char *rom_name*/)
 	SDL_WM_SetIcon(icon,NULL);
 	
 	calculate_hotkey_bitmasks();    
-	init_event();
+	//init_joysticks();
 	
 	//if (nomouse == NULL)
 	//SDL_ShowCursor(SDL_DISABLE);
@@ -175,11 +174,11 @@ int main(int argc, char *argv[])
 		//did we get a config from cmd line?
     Tempstr=rstrcpy(Tempstr, cf_get_string_by_name("config"), 1024); 
 		//if not, then if we got a rom name, try loading conf for that
-		if ((! sstrlen(Tempstr)) && sstrlen(rom_name)) Tempstr=cf_default_path(Tempstr, rom_name, ".conf");
+		if ((! sstrlen(Tempstr)) && sstrlen(rom_name)) Tempstr=cf_default_configpath(Tempstr, rom_name, ".conf");
 		//else open Default configuration file
 		if ((! sstrlen(Tempstr)) || (! cf_open_file(Tempstr)))
 		{
-			Tempstr=cf_default_path(Tempstr, "gngeorc","");
+			Tempstr=cf_default_configpath(Tempstr, "gngeorc","");
     	cf_open_file(Tempstr); 
 		}
 

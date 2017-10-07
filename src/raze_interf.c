@@ -28,6 +28,10 @@
 #include "raze/raze.h"
 //#include "2610intf.h"
 
+void cpu_z80_mkstate(gzFile *gzf,int mode) {
+  /* TODO */
+}
+
 
 
 void cpu_z80_switchbank(Uint8 bank, Uint16 PortNo)

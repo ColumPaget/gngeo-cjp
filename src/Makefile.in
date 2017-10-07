@@ -119,10 +119,11 @@ am__gngeo_SOURCES_DIST = utility_functions.c utility_functions.h \
 	sound.c unzip.c resfile.h debug.c debug.h neocrypt.h state.c \
 	state.h video_template.h conf.c conf.h transpack.h transpack.c \
 	menu.c menu.h roms.h roms.c mame_layer.h mame_layer.c \
-	neoboot.c event.h event.c stb_image.c stb_image.h stb_zlib.c \
-	stb_zlib.h star_interf.c generator68k_interf.c \
-	cyclone_interf.c raze_interf.c mamez80_interf.c drz80_interf.c \
-	video_arm.s memcpy.S gp2x.h gp2x.c
+	neoboot.c event.h event.c joysticks.c joysticks.h stb_image.c \
+	stb_image.h stb_zlib.c stb_zlib.h star_interf.c \
+	generator68k_interf.c cyclone_interf.c raze_interf.c \
+	mamez80_interf.c drz80_interf.c video_arm.s memcpy.S gp2x.h \
+	gp2x.c
 @USE_STARSCREAM_TRUE@am__objects_1 = star_interf.$(OBJEXT)
 @USE_GENERATOR68K_TRUE@am__objects_2 = generator68k_interf.$(OBJEXT)
 @USE_CYCLONE_TRUE@am__objects_3 = cyclone_interf.$(OBJEXT)
@@ -141,10 +142,10 @@ am_gngeo_OBJECTS = utility_functions.$(OBJEXT) fileio.$(OBJEXT) \
 	unzip.$(OBJEXT) debug.$(OBJEXT) state.$(OBJEXT) conf.$(OBJEXT) \
 	transpack.$(OBJEXT) menu.$(OBJEXT) roms.$(OBJEXT) \
 	mame_layer.$(OBJEXT) neoboot.$(OBJEXT) event.$(OBJEXT) \
-	stb_image.$(OBJEXT) stb_zlib.$(OBJEXT) $(am__objects_1) \
-	$(am__objects_2) $(am__objects_3) $(am__objects_4) \
-	$(am__objects_5) $(am__objects_6) $(am__objects_7) \
-	$(am__objects_8)
+	joysticks.$(OBJEXT) stb_image.$(OBJEXT) stb_zlib.$(OBJEXT) \
+	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
+	$(am__objects_4) $(am__objects_5) $(am__objects_6) \
+	$(am__objects_7) $(am__objects_8)
 gngeo_OBJECTS = $(am_gngeo_OBJECTS)
 @USE_GP2X_FALSE@gngeo_DEPENDENCIES = effect/libeffect.a \
 @USE_GP2X_FALSE@	blitter/libblitter.a ym2610/libym2610.a \
@@ -268,6 +269,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BIOSPATH = @BIOSPATH@
 CC = @CC@
 CCAS = @CCAS@
 CCASDEPMODE = @CCASDEPMODE@
@@ -307,6 +309,7 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
+ROMPATH = @ROMPATH@
 SDL_CFLAGS = @SDL_CFLAGS@
 SDL_CONFIG = @SDL_CONFIG@
 SDL_LIBS = @SDL_LIBS@
@@ -371,7 +374,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #INCLUDES = -DDATA_DIRECTORY='"${pkgdatadir}"'
-AM_CPPFLAGS = -DDATA_DIRECTORY=\"$(pkgdatadir)\"
+AM_CPPFLAGS = -DDATA_DIRECTORY=\"$(pkgdatadir)\" -DROMPATH=\"$(ROMPATH)\" -DBIOSPATH=\"$(BIOSPATH)\"
+AM_CFLAGS = -DDATA_DIRECTORY=\"$(pkgdatadir)\" -DROMPATH=\"$(ROMPATH)\" -DBIOSPATH=\"$(BIOSPATH)\"
 SUBDIRS = effect blitter ym2610 $(m68k_subdir) $(z80_subdir) $(gui_subdir)
 gngeo_SOURCES = utility_functions.c utility_functions.h fileio.c \
 	pd4990a.c gngeo_icon.h sound.h fileio.h profiler.c main.c \
@@ -382,10 +386,11 @@ gngeo_SOURCES = utility_functions.c utility_functions.h fileio.c \
 	resfile.h debug.c debug.h neocrypt.h state.c state.h \
 	video_template.h conf.c conf.h transpack.h transpack.c menu.c \
 	menu.h roms.h roms.c mame_layer.h mame_layer.c neoboot.c \
-	event.h event.c stb_image.c stb_image.h stb_zlib.c stb_zlib.h \
-	$(am__append_1) $(am__append_2) $(am__append_3) \
-	$(am__append_4) $(am__append_5) $(am__append_6) \
-	$(am__append_7) $(am__append_8)
+	event.h event.c joysticks.c joysticks.h stb_image.c \
+	stb_image.h stb_zlib.c stb_zlib.h $(am__append_1) \
+	$(am__append_2) $(am__append_3) $(am__append_4) \
+	$(am__append_5) $(am__append_6) $(am__append_7) \
+	$(am__append_8)
 @USE_CYCLONE_TRUE@m68k_subdir = cyclone
 @USE_GENERATOR68K_TRUE@m68k_subdir = generator68k
 
@@ -501,6 +506,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frame_skip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/generator68k_interf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gp2x.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/joysticks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mame_layer.Po@am__quote@

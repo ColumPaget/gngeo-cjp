@@ -43,6 +43,7 @@
 #include "fileio.h"
 //#include "driver.h"
 #include "emu.h"
+#include "joysticks.h"
 #include "fileio.h"
 #include "memory.h"
 #include "utility_functions.h"
@@ -118,24 +119,16 @@ static int default_p2hotkey3[] = {0, 0, 0, 0};
 
 
 //generate config-file default path for various systems
-char *cf_default_path(char *conf_file, const char *filename, const char *extn)
+char *cf_default_configpath(char *conf_file, const char *filename, const char *extn)
 {
 int len;
 
-		len=sstrlen(filename)+sstrlen(extn);
-
 #ifdef EMBEDDED_FS
-		len+= sstrlen(ROOTPATH) + sstrlen("conf/") + 1;
-		conf_file = (char *) realloc(conf_file, len * sizeof (char));
-		sprintf(conf_file, "%s%s%s%s",ROOTPATH,"conf/",filename,extn);
+		conf_file=rstrbuild(conf_file, ROOTPATH, "conf/", filename, extn, NULL);
 #elif __AMIGA__
-		len+=sstrlen("/PROGDIR/data/") + 1;
-		conf_file = (char *) realloc(conf_file, len * sizeof (char));
-		sprintf(conf_file, "%s%s%s","/PROGDIR/data/",filename,extn);
+		conf_file=rstrbuild(conf_file, "/PROGDIR/data/", filename, extn, NULL);
 #else
-		len += sstrlen(getenv("HOME")) + sstrlen("/.gngeo/") + 1;
-		conf_file = (char *) realloc(conf_file, len * sizeof (char));
-		sprintf(conf_file, "%s/.gngeo/%s%s", getenv("HOME"),filename,extn);
+		conf_file=rstrbuild(conf_file, getenv("HOME"),"/.gngeo/", filename, extn, NULL);
 #endif
 
 return(conf_file);
@@ -143,9 +136,43 @@ return(conf_file);
 
 
 
+//generate config-file default path for various systems
+char *cf_default_rompath(char *path)
+{
+int len;
+
+#ifdef ROMPATH
+		path=rstrcpy(path, ROMPATH, 0);
+#elif EMBEDDED_FS
+		path=rstrbuild(path, ROOTPATH, "./roms", NULL);
+#else
+		path=rstrcpy(path, DATA_DIRECTORY, 0);
+#endif
+
+return(path);
+}
+
+char *cf_default_biospath(char *path)
+{
+int len;
+
+#ifdef BIOSPATH
+		path=rstrcpy(path, BIOSPATH, 0);
+#elif EMBEDDED_FS
+		path=rstrbuild(path, ROOTPATH, "./roms", NULL);
+#else
+		path=rstrcpy(path, DATA_DIRECTORY, 0);
+#endif
+
+return(path);
+}
+
+
 void cf_cache_conf(void) {
 	char *country;
 	char *system;
+
+printf("cache_conf\n");
 	/* cache some frequently used conf item */
 	//	printf("Update Conf Cache, sample rate=%d -> %d\n",conf.sample_rate,CF_VAL(cf_get_item_by_name("samplerate")));
 	conf.sound = CF_BOOL(cf_get_item_by_name("sound"));
@@ -154,6 +181,10 @@ void cf_cache_conf(void) {
 	conf.debug = CF_BOOL(cf_get_item_by_name("debug"));
 	conf.raster = CF_BOOL(cf_get_item_by_name("raster"));
 	conf.pal = CF_BOOL(cf_get_item_by_name("pal"));
+
+	conf.joystick = CF_BOOL(cf_get_item_by_name("joystick"));
+	init_joysticks();
+	printf("js: %d\n",conf.joystick);
 
 	conf.autoframeskip = CF_BOOL(cf_get_item_by_name("autoframeskip"));
 	conf.show_fps = CF_BOOL(cf_get_item_by_name("showfps"));
@@ -436,12 +467,18 @@ static int show_all_game(CONF_ITEM *self) {
 
 static int show_version(CONF_ITEM *self) {
 	printf("Gngeo %s\n", VERSION);
+	printf("(Colum Paget's fork) colums.projects@gmail.com\n");
 	printf("Copyright (C) 2001 Peponas Mathieu\n\n");
 
 	return 0;
 }
 
 void cf_init(void) {
+char *default_rompath=NULL;
+char *default_biospath=NULL;
+
+default_rompath=cf_default_rompath(default_rompath);
+default_biospath=cf_default_biospath(default_biospath);
 
 	cf_create_action_item("help", "Print this help and exit", 'h', print_help);
 	cf_create_action_item("listgame", "Show all the game available in the romrc", 'l', show_all_game);
@@ -457,7 +494,7 @@ void cf_init(void) {
 	cf_create_bool_item("showfps", "Show FPS at startup", 0, false);
 
 	cf_create_bool_item("sleepidle", "Sleep when idle", 0, false);
-	cf_create_bool_item("joystick", "Enable joystick support", 0, true);
+	cf_create_bool_item("joystick", "Enable joystick support", 0, false);
 	cf_create_bool_item("debug", "Start with inline debuger", 'D', false);
 	cf_create_bool_item("hwsurface", "Use hardware surface for the screen", 'H', true);
 #ifdef PANDORA
@@ -478,14 +515,14 @@ void cf_init(void) {
 
 	cf_create_string_item("country", "Set the contry to japan, asia, usa or europe", "...", 0, "europe");
 	cf_create_string_item("system", "Set the system to home, arcade or unibios", "...", 0, "arcade");
+
+	cf_create_string_item("rompath", "Tell gngeo where your roms are", "PATH", 'i', default_rompath);
+	cf_create_string_item("biospath", "Tell gngeo where your neogeo bios is", "PATH", 'B', default_biospath);
+
 #ifdef EMBEDDED_FS
-	cf_create_string_item("rompath", "Tell gngeo where your roms are", "PATH", 'i', ROOTPATH"./roms");
-	cf_create_string_item("biospath", "Tell gngeo where your neogeo bios is", "PATH", 'B', ROOTPATH"./roms");
-	cf_create_string_item("datafile", "Tell gngeo where his ressource file is", "PATH", 'd', ROOTPATH"./gngeo_data.zip");
+	cf_create_string_item("datafile", "Tell gngeo where his resource file is", "PATH", 'd', ROOTPATH"./gngeo_data.zip");
 #else
-	cf_create_string_item("rompath", "Tell gngeo where your roms are", "PATH", 'i', DATA_DIRECTORY);
-	cf_create_string_item("biospath", "Tell gngeo where your neogeo bios is", "PATH", 'B', DATA_DIRECTORY);
-	cf_create_string_item("datafile", "Tell gngeo where his ressource file is", "PATH", 'd', DATA_DIRECTORY"/gngeo_data.zip");
+	cf_create_string_item("datafile", "Tell gngeo where his resource file is", "PATH", 'd', DATA_DIRECTORY"/gngeo_data.zip");
 #endif
 	//cf_create_string_item("romrcdir","Use STRING as romrc.d directory",0,DATA_DIRECTORY"/romrc.d");
 	cf_create_string_item("libglpath", "Path to your libGL.so", "PATH", 0, "/usr/lib/libGL.so");
@@ -545,7 +582,10 @@ void cf_init(void) {
 	cf_create_string_item("frontend", "Execute CMD when exit. Usefull to return to Selector or Rage2x", "CMD", 0, "/usr/gp2x/gp2xmenu");
 #endif
 
+free(default_biospath);
+free(default_rompath);
 }
+
 
 /* TODO: lame, do it better */
 bool discard_line(char *buf) {
@@ -586,7 +626,7 @@ bool cf_save_file(char *filename, int flags) {
 	char *name=NULL, *ptr;
 	CONF_ITEM *cf;
 
-	if (! sstrlen(filename)) conf_file=cf_default_path(conf_file, "gngeorc", "");
+	if (! sstrlen(filename)) conf_file=cf_default_configpath(conf_file, "gngeorc", "");
 	else conf_file=rstrcpy(conf_file, filename, 1024);
 
 	conf_file_dst = alloca(strlen(conf_file) + 4);

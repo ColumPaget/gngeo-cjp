@@ -5,10 +5,17 @@ file on the command-line. The default font has been make proportional to
 maximise screen real estate, and the user can now specify messages that
 appear on the screen (the aim of this is to put a summary of moves onscreen
 though there's only room for a few. You can also have date/time and hostname
-through the use of % format strings.
+through the use of % format strings. Default rompath and biospath can now be 
+set at compile time. Joystick input can be disabled (this wasn't working and
+on laptops the touchpad is often detected as a joystick, causing all kinds of 
+problems).
 
+Gngeo offers a choice of emulator cores for the z80 and m68000 microprocessors.
+Unfortunately not all of these compile any more. On my systems the only z80
+core that compiles is 'raze' and only 'starscream' and 'genm68k' work for 
+the m68000. So select these at compile time like so:
 
-
+ ./configure  --with-m68kcore=starscream --with-z80core=raze
 
 GNGEO : A NeoGeo emulator for linux (and maybe some other unix)
 

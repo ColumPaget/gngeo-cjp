@@ -7,6 +7,7 @@
 #include <strings.h>
 #include <string.h>
 #include <stdbool.h>
+#include "utility_functions.h"
 #include "roms.h"
 #include "emu.h"
 #include "memory.h"
@@ -1221,9 +1222,8 @@ bool dr_load_bios(GAME_ROMS *r) {
 	char *rpath = cf_get_string_by_name("rompath");
 	char *fpath;
 	char *romfile;
-	fpath = malloc(strlen(rpath) + strlen("neogeo.zip") + 2);
-	sprintf(fpath, "%s/neogeo.zip", rpath);
 
+	fpath=rstrbuild(fpath, rpath, "/neogeo.zip", NULL);
 	pz = gn_open_zip(fpath);
 	if (pz == NULL) {
 		fprintf(stderr, "Can't open BIOS (%s)\n", fpath);
@@ -1261,9 +1261,8 @@ bool dr_load_bios(GAME_ROMS *r) {
 			/* First check in neogeo.zip */
 			r->bios_m68k.p = gn_unzip_file_malloc(pz, "uni-bios.rom", 0x0, &r->bios_m68k.size);
 			if (r->bios_m68k.p == NULL) {
-				unipath = malloc(strlen(rpath) + strlen("uni-bios.rom") + 2);
 
-				sprintf(unipath, "%s/uni-bios.rom", rpath);
+				unipath=rstrbuild(unipath, rpath, "/uni-bios.rom", NULL);
 				f = fopen(unipath, "rb");
 				if (!f) { /* TODO: Fallback to arcade mode */
 					fprintf(stderr, "Can't open Universal BIOS (%s)\n", unipath);

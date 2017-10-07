@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(gngeo,0.9-cjp)
+AC_INIT([gngeo],[0.9.3-cjp])
 AC_CONFIG_SRCDIR([src/emu.c])
 AC_CANONICAL_TARGET
 AM_CONFIG_HEADER(config.h)
@@ -39,6 +39,13 @@ GN_ARG_ENABLE(pandora, [--enable-pandora        Enable PANDORA build])
 GN_ARG_ENABLE(win32,   [--enable-win32          Enable WIN32 build])
 GN_ARG_ENABLE(dingux,  [--enable-dingux         Enable DINGUX build])
 GN_ARG_ENABLE(embedded,[--enable-embedded       Enable Embedded directory structure])
+
+
+AC_SUBST(ROMPATH)
+AC_ARG_WITH(rompath,[  --with-rompath=[path]     Specify path to directory containing roms files], [ROMPATH="$withval"], [])
+AC_SUBST(BIOSPATH)
+AC_ARG_WITH(biospath,[  --with-biospath=[path]   Specify path to directory containing bios files], [BIOSPATH="$withval"], [])
+
 
 
 # Check for SDL
@@ -196,10 +203,20 @@ case "${z80core}" in
 	*) AC_MSG_ERROR([The specified z80 core is invalid]) ;;
 esac
 
+AC_ARG_ENABLE(opengl,     [  --disable-opengl       disable opengl blitter],
+                           [case "${enableval}" in
+       						yes) enable_opengl=true  ;;
+       						no)  enable_opengl=false ;;
+       						*) AC_MSG_ERROR([bad value ${enableval} for --disable-opengl]) ;;
+     						esac],
+     						[enable_opengl=true])
 
 
+
+if  test "$enable_opengl" = true ; then
 AC_CHECK_HEADERS(GL/gl.h)
 AC_DEFINE([USE_GL2],[1],[Define to use alternative opengl blitter])
+fi
 
 AM_CONDITIONAL(HAVE_NASM,[test x$have_nasm = xtrue])
 AM_CONDITIONAL(USE_STARSCREAM,[test x$use_starscream = xtrue])

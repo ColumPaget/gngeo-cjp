@@ -32,6 +32,7 @@
 #include <zlib.h>
 #include <stdbool.h>
 
+#include "utility_functions.h"
 #include "unzip.h"
 #include "memory.h"
 #include "video.h"
@@ -260,8 +261,7 @@ if (rom_name)
 			if (name) 
 			{
 				printf("Tring to load a gno file %s %s\n",rom_name,name);
-				drconf=(char *) realloc(drconf, strlen(gpath)+strlen(name)+strlen(".cf")+1);
-				sprintf(drconf,"%s%s.cf",gpath,name);
+				drconf=rstrbuild(drconf, gpath, name, ".cf", NULL);
 			} 
 			else 
 			{
@@ -269,11 +269,7 @@ if (rom_name)
 				return false;
 			}
 	}
-	else
-	{
-			drconf=(char *) realloc(drconf, strlen(gpath)+strlen(rom_name)+strlen(".cf")+1);
-			sprintf(drconf,"%s%s.cf",gpath,rom_name);
-	}
+	else drconf=rstrbuild(drconf, gpath, rom_name, ".cf", NULL);
 
 	if (access(drconf,F_OK)==0)
 	{

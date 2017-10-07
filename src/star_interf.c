@@ -341,4 +341,8 @@ void cpu_68k_set_state(M68K_STATE *st)
     star_context.sr=st->sr;
     s68000SetContext(&star_context);
 }
+
+
+void cpu_68k_mkstate(gzFile *gzf,int mode) {
+}
 #endif

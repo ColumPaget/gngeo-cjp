@@ -33,6 +33,7 @@
 #include <stdbool.h>
 #include <math.h>
 
+#include "utility_functions.h"
 #include "menu.h"
 
 #include "messages.h"
@@ -991,7 +992,7 @@ int menu_event_handling(struct GN_MENU *self) {
 			mi = gn_menu_get_item_by_index(self, self->current);
 			if (mi && mi->action) {
 				reset_event();
-				if ((a = mi->action(mi, NULL))>0) return a;
+				if ((a = mi->action(mi, mi->arg))>0) return a;
 			}
 			break;
 		default:
@@ -1022,14 +1023,6 @@ GN_MENU *create_menu(char *name, int type,
 	return gmenu;
 }
 
-GN_MENU_ITEM *gn_menu_add_item(GN_MENU *gmenu, const char *name, int type,
-		int (*action)(struct GN_MENU_ITEM *self, void *param), void *param) {
-	GN_MENU_ITEM *gitem;
-	gitem = gn_menu_create_item(name, type, action, param);
-	gmenu->item = list_append(gmenu->item, (void*) gitem);
-	gmenu->nb_elem++;
-	return gitem;
-}
 
 GN_MENU_ITEM *gn_menu_get_item_by_name(GN_MENU *gmenu, char *name) {
 	GN_MENU_ITEM *gitem;
@@ -1120,8 +1113,7 @@ void init_rom_browser_menu(void) {
 	while (romlist[i]) 
 	{
 		p_rompath=cf_get_string_by_name("rompath");
-		filename=realloc(filename, strlen(p_rompath) + 256);
-		sprintf(filename, "%s/%s.zip", p_rompath, romlist[i]);
+		filename=rstrbuild(filename, p_rompath, "/", romlist[i], ".zip", NULL);
 
 		if (stat(filename, &filestat) == 0 && S_ISREG(filestat.st_mode)) {
 			if ((drv = dr_check_zip(filename)) != NULL) 
@@ -1225,49 +1217,14 @@ static int toggle_fullscreen(GN_MENU_ITEM *self, void *param) {
 	return MENU_STAY;
 }
 
-static int toggle_wide(GN_MENU_ITEM *self, void *param) {
+static int toggle_bool(GN_MENU_ITEM *self, void *param) {
 	self->val = 1 - self->val;
 
-	cf_item_has_been_changed(cf_get_item_by_name("wide"));
-	CF_BOOL(cf_get_item_by_name("wide")) = self->val;
-	screen_reinit();
-	return MENU_STAY;
-}
-
-static int toggle_vsync(GN_MENU_ITEM *self, void *param) {
-
-	self->val = 1 - self->val;
-	conf.vsync = self->val;
-	cf_item_has_been_changed(cf_get_item_by_name("vsync"));
-	CF_BOOL(cf_get_item_by_name("vsync")) = self->val;
-	screen_reinit();
-	return MENU_STAY;
-}
-
-static int toggle_autoframeskip(GN_MENU_ITEM *self, void *param) {
-	self->val = 1 - self->val;
-	conf.autoframeskip = self->val;
-	cf_item_has_been_changed(cf_get_item_by_name("autoframeskip"));
-	CF_BOOL(cf_get_item_by_name("autoframeskip")) = self->val;
+	cf_item_has_been_changed(cf_get_item_by_name((char *) param));
+	CF_BOOL(cf_get_item_by_name((char *) param)) = self->val;
+	cf_cache_conf();
+	if (strcmp((char *) param,"wide")==0) screen_reinit();
 	reset_frame_skip();
-	return MENU_STAY;
-}
-
-static int toggle_sleepidle(GN_MENU_ITEM *self, void *param) {
-	self->val = 1 - self->val;
-	conf.sleep_idle = self->val;
-	cf_item_has_been_changed(cf_get_item_by_name("sleepidle"));
-	CF_BOOL(cf_get_item_by_name("sleepidle")) = self->val;
-
-	return MENU_STAY;
-}
-
-static int toggle_showfps(GN_MENU_ITEM *self, void *param) {
-	self->val = 1 - self->val;
-	conf.show_fps = self->val;
-	cf_item_has_been_changed(cf_get_item_by_name("showfps"));
-	CF_BOOL(cf_get_item_by_name("showfps")) = self->val;
-
 	return MENU_STAY;
 }
 
@@ -1421,6 +1378,7 @@ static void reset_menu_option(void) {
 	RESET_BOOL("Fullscreen","fullscreen");
 	RESET_BOOL("Vsync","vsync");
 	RESET_BOOL("Auto Frame Skip","autoframeskip");
+	RESET_BOOL("Joystick Support","joystick");
 	RESET_BOOL("Sleep while idle","sleepidle");
 	RESET_BOOL("Show FPS","showfps");
 #ifdef PANDORA
@@ -1487,27 +1445,32 @@ void gn_init_menu(void) {
 	option_menu->item = list_append(option_menu->item, (void*) gitem);
 	option_menu->nb_elem++;
 #ifdef PANDORA
-	gitem = gn_menu_create_item("16/9", MENU_CHECK, toggle_wide, NULL);
+	gitem = gn_menu_create_item("16/9", MENU_CHECK, toggle_bool, "wide");
 	gitem->val = CF_BOOL(cf_get_item_by_name("wide"));
 	option_menu->item = list_append(option_menu->item, (void*) gitem);
 	option_menu->nb_elem++;
 #endif
-	gitem = gn_menu_create_item("Vsync", MENU_CHECK, toggle_vsync, NULL);
+	gitem = gn_menu_create_item("Vsync", MENU_CHECK, toggle_bool, "vsync");
 	gitem->val = CF_BOOL(cf_get_item_by_name("vsync"));
 	option_menu->item = list_append(option_menu->item, (void*) gitem);
 	option_menu->nb_elem++;
 
-	gitem = gn_menu_create_item("Auto Frame Skip", MENU_CHECK, toggle_autoframeskip, NULL);
+	gitem = gn_menu_create_item("Auto Frame Skip", MENU_CHECK, toggle_bool, "autoframeskip");
 	gitem->val = CF_BOOL(cf_get_item_by_name("autoframeskip"));
 	option_menu->item = list_append(option_menu->item, (void*) gitem);
 	option_menu->nb_elem++;
 
-	gitem = gn_menu_create_item("Sleep while idle", MENU_CHECK, toggle_sleepidle, NULL);
+	gitem = gn_menu_create_item("Joystick Support", MENU_CHECK, toggle_bool, "joystick");
+	gitem->val = CF_BOOL(cf_get_item_by_name("joystick"));
+	option_menu->item = list_append(option_menu->item, (void*) gitem);
+	option_menu->nb_elem++;
+
+	gitem = gn_menu_create_item("Sleep while idle", MENU_CHECK, toggle_bool, "sleepidle");
 	gitem->val = CF_BOOL(cf_get_item_by_name("sleepidle"));
 	option_menu->item = list_append(option_menu->item, (void*) gitem);
 	option_menu->nb_elem++;
 
-	gitem = gn_menu_create_item("Show FPS", MENU_CHECK, toggle_showfps, NULL);
+	gitem = gn_menu_create_item("Show FPS", MENU_CHECK, toggle_bool, "showfps");
 	gitem->val = CF_BOOL(cf_get_item_by_name("showfps"));
 	option_menu->item = list_append(option_menu->item, (void*) gitem);
 	option_menu->nb_elem++;
@@ -1556,7 +1519,6 @@ Uint32 run_menu(void) {
 	init_back();
 
 	reset_event();
-	//	conf.autoframeskip = 1;
 	reset_frame_skip();
 
 	gn_menu_disable_item(main_menu, "Load state");

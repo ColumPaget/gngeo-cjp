@@ -1,7 +1,17 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 //Some simple utility funcs so we don't use unsafe strcpy and so we don't mix strcpy/dup etc
+
+
+//strlen that doesn't crash if it's passed a null
+int sstrlen(const char *String)
+{
+if (! String) return(0);
+return(strlen(String));
+}
+
 
 //realloc strcpy
 char *rstrcpy(char *Dest, const char *Src, int Max)
@@ -17,10 +27,36 @@ Dest[len]='\0';
 return(Dest);
 }
 
-int sstrlen(const char *String)
+
+char *rstrbuild(char *Dest, ...)
 {
-if (! String) return(0);
-return(strlen(String));
+const char *ptr=NULL;
+va_list args;
+int len=0, pos=0;
+
+va_start(args,Dest);
+ptr=va_arg(args, const char *);
+while (ptr)
+{
+len+=sstrlen(ptr);
+ptr=va_arg(args, const char *);
+}
+va_end(args);
+
+Dest=(char *) realloc(Dest, len+1);
+va_start(args,Dest);
+ptr=va_arg(args, const char *);
+while (ptr)
+{
+	len=sstrlen(ptr);
+	memcpy(Dest+pos, ptr, len);
+	pos+=len;
+	ptr=va_arg(args, const char *);
+}
+va_end(args);
+Dest[pos]='\0';
+
+return(Dest);
 }
 
 
